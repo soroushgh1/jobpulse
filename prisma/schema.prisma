@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
+  username String
+  password String
+  role     String
+  phone String @unique
+
+  companies Company[]
+  requests  Request[]
+}
+
+model Company {
+  id          Int      @id @default(autoincrement())
+  name        String
+  slug        String   @unique
+  description String
+  pictures    String[] @default(["www.example.com"])
+  address     String
+  phone       String   @unique
+  email       String   @unique
+  ownerId     Int
+
+  owner   User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  positions Position[]
+}
+
+model Position {
+  id          Int      @id @default(autoincrement())
+  name        String
+  slug        String   @unique
+  description String
+  companyId   Int
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  requests Request[]
+}
+
+model Request {
+  id          Int      @id @default(autoincrement())
+  resume      String
+  userId      Int
+  isAccept    Boolean  @default(false)
+  denyReason  String?
+  positionId  Int
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  position Position @relation(fields: [positionId], references: [id], onDelete: Cascade)
+}
