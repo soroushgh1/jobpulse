@@ -41,6 +41,8 @@ export class PositionRepo{
             data:{
                 name: input.name,
                 description: input.description,
+                degree: input.degree,
+                salary: input.salary,
                 slug: slug,
                 companyId: company.id
             }
