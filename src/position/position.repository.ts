@@ -3,6 +3,7 @@ import { Company, Position, User } from "@prisma/client";
 import PrismaService from "prisma/prisma.service";
 import { CreatePositionInput } from "./DTO/CreatePositionInput.dto";
 import slugify from "slugify";
+import { PositionGet } from "src/types/types";
 
 @Injectable()
 export class PositionRepo{
@@ -50,4 +51,32 @@ export class PositionRepo{
 
         return position;
     }
+
+    async ShowOne(slug: string): Promise<PositionGet | null> {
+
+        const position: PositionGet | null = await this.prismaService.position.findUnique({ where: {slug: slug}, select: {
+            id: true,
+            name: true,
+            degree: true,
+            description: true,
+            salary: true,
+            slug: true,
+            company: { select: { 
+                address: true,
+                email: true,
+                id: true, 
+                slug: true, 
+                description: true, 
+                phone: true,
+                name: true,
+                pictures: true,
+            }}
+
+        } })
+
+        if (!position) throw new NotFoundException('position not found');
+
+        return position;
+    }
+
 }

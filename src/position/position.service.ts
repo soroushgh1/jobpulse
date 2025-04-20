@@ -2,6 +2,7 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { PositionRepo } from './position.repository';
 import { CreatePositionInput } from './DTO/CreatePositionInput.dto';
 import { Position } from '@prisma/client';
+import { PositionGet } from 'src/types/types';
 
 @Injectable()
 export class PositionService {
@@ -22,5 +23,19 @@ export class PositionService {
             console.log(err)
             throw new HttpException(err.message, 500);
         }
+    }
+
+    async ShowOne(slug: string): Promise<PositionGet | null> {
+
+        try {
+            
+            const position: PositionGet | null = await this.positionRepo.ShowOne(slug);
+
+            return position;
+
+        } catch (err: any) {
+            throw new HttpException(err.message, 500);
+        }
+
     }
 }
