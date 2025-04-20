@@ -3,6 +3,7 @@ import { Company } from '@prisma/client';
 import PrismaService from 'prisma/prisma.service';
 import { CompanyRegisterInput, CompanyUpdateInput } from './DTO/company.dto';
 import slugify from 'slugify';
+import { CompanyGet } from 'src/types/types';
 
 @Injectable()
 export class CompanyRepository {
@@ -121,4 +122,22 @@ export class CompanyRepository {
 
   }
 
+  async ViewAll(): Promise<CompanyGet[] | null> {
+
+    const allCompanies: CompanyGet[] | null = await this.prismaService.company.findMany({
+      select: {
+        address: true,
+        email: true,
+        id: true, 
+        slug: true, 
+        description: true, 
+        phone: true,
+        name: true,
+        pictures: true,
+      }
+    });
+
+    return allCompanies;   
+
+  } 
 }

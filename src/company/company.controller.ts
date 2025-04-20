@@ -43,4 +43,10 @@ export class CompanyController {
 
         return { success: true, message: result };
     }
+
+    @Get('')
+    async ViewAll(): Promise<any> {
+        return { companies: await this.companyService.ViewAll(), success: true };
+    }
+
 }

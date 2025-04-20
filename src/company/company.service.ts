@@ -77,4 +77,14 @@ export class CompanyService {
 
     return result;
   }
+
+  async ViewAll(): Promise<CompanyGet[] | null> {
+    try {
+      
+      return this.companyRepo.ViewAll()
+
+    } catch (err: any) {
+      throw new HttpException(err.message, 500);
+    }
+  }
 }
