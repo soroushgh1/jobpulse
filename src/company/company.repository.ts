@@ -29,10 +29,21 @@ export class CompanyRepository {
     return company;
   }
 
-  async FindOnSlug(slug: string): Promise<Company | null> {
+  async FindOnSlug(slug: string): Promise<CompanyGet | null> {
 
-    const company: Company | null = await this.prismaService.company.findUnique({
-      where: { slug: slug }
+    const company: CompanyGet | null = await this.prismaService.company.findUnique({
+      where: { slug: slug },
+      select : {
+        name: true,
+        email: true,
+        address: true,
+        description: true,
+        phone: true,
+        pictures: true,
+        slug: true,
+        positions: true,
+        id: true,
+      }
     })
 
     if (!company) throw new NotFoundException('company not found');

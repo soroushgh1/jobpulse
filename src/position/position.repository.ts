@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { HttpException, Injectable, NotFoundException } from "@nestjs/common";
 import { Company, Position, User } from "@prisma/client";
 import PrismaService from "prisma/prisma.service";
-import { CreatePositionInput } from "./DTO/CreatePositionInput.dto";
 import slugify from "slugify";
 import { PositionGet } from "src/types/types";
+import { CreatePositionInput, UpdatePositionInput } from "./DTO/position.dto";
 
 @Injectable()
 export class PositionRepo{
@@ -79,4 +79,56 @@ export class PositionRepo{
         return position;
     }
 
+    async UpdatePosition(input: UpdatePositionInput, position_slug: string, user_id: number): Promise<PositionGet | null> {
+
+        const position: Position | null = await this.FindOnSlug(position_slug);
+        if (!position) throw new NotFoundException('position not found for update');
+
+        const company: Company | null = await this.prismaService.company.findUnique({ where: { id: position.id } });
+        if (!company) throw new NotFoundException('company for position not found to update');
+
+        if (company.ownerId != user_id) throw new HttpException('you are not the owner of this position to update it', 400);
+
+        if (input.name && position.name != input.name) {
+
+            const baseSlug: string = await slugify(input.name, { lower: true });
+
+            let slug: string = baseSlug;
+            let counter: number = 1;
+          
+            while (await this.prismaService.position.findUnique({ where: { slug: slug } })) {
+                slug = `${baseSlug}-${counter}`;
+                counter++;
+            }
+
+            (input as any).slug = slug
+        }
+        console.log(input)
+        const updatedPosition: PositionGet | null = await this.prismaService.position.update({
+            where: {
+                slug: position_slug
+            },
+            data: input,
+            select: {
+            id: true,
+            name: true,
+            degree: true,
+            description: true,
+            salary: true,
+            slug: true,
+            company: { select: { 
+                address: true,
+                email: true,
+                id: true, 
+                slug: true, 
+                description: true, 
+                phone: true,
+                name: true,
+                pictures: true,
+            }}
+            }
+        });
+
+        return updatedPosition;
+    }
 }

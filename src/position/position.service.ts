@@ -1,8 +1,8 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { PositionRepo } from './position.repository';
-import { CreatePositionInput } from './DTO/CreatePositionInput.dto';
 import { Position } from '@prisma/client';
 import { PositionGet } from 'src/types/types';
+import { CreatePositionInput, UpdatePositionInput } from './DTO/position.dto';
 
 @Injectable()
 export class PositionService {
@@ -35,6 +35,21 @@ export class PositionService {
 
         } catch (err: any) {
             throw new HttpException(err.message, 500);
+        }
+
+    }
+    
+    async UpdatePosition(input: UpdatePositionInput, user_id, position_slug): Promise<string> {
+
+        try {
+         
+            const updatedPosition: PositionGet | null = await this.positionRepo.UpdatePosition(input, position_slug, user_id);
+
+            if (!updatedPosition) throw new HttpException('there is an error in updating position', 400);
+    
+            return "position updated successfully";          
+        } catch (err: any) {
+            throw new HttpException(err.message, 400);
         }
 
     }

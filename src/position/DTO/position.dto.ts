@@ -3,7 +3,7 @@ import { Degree } from "src/enums/enums";
 
 export class CreatePositionInput {
 
-    @IsNotEmpty({ message: 'position can not be empty' })
+    @IsNotEmpty({ message: 'position name can not be empty' })
     @IsString()
     name: string;
 
@@ -19,4 +19,15 @@ export class CreatePositionInput {
     @IsNotEmpty({ message: "degree can not be empty" })
     degree: string
 
+}
+
+export class UpdatePositionInput {
+
+    name: string;
+
+    description: string;
+
+    salary: string;
+
+    degree: string
 }

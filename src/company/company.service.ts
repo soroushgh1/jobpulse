@@ -57,15 +57,13 @@ export class CompanyService {
 
     try {
       
-      const company: Company | null = await this.companyRepo.FindOnSlug(slug);
+      const company: CompanyGet | null = await this.companyRepo.FindOnSlug(slug);
 
       if (!company) {
         throw new NotFoundException('company not found')
       }
 
-      const { ownerId, ...finalCompany } = company;
-
-      return finalCompany as CompanyGet | null;
+      return company;
     } catch (err: any) {
       throw new HttpException(err.message, 500)
     }
