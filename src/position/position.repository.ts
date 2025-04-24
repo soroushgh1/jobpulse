@@ -103,7 +103,7 @@ export class PositionRepo{
 
             (input as any).slug = slug
         }
-        console.log(input)
+
         const updatedPosition: PositionGet | null = await this.prismaService.position.update({
             where: {
                 slug: position_slug
@@ -131,4 +131,43 @@ export class PositionRepo{
 
         return updatedPosition;
     }
+
+    async DeletePosition(slug: string, user_id: number): Promise<string> {
+
+        const findPosition: Position | null = await this.prismaService.position.findUnique({ where: { slug: slug }, 
+        select: { 
+            id: true,
+            name: true,
+            degree: true,
+            description: true,
+            salary: true,
+            slug: true,
+            companyId: true,
+            company: { select: { 
+                address: true,
+                email: true,
+                id: true, 
+                slug: true, 
+                description: true, 
+                phone: true,
+                name: true,
+                pictures: true,
+                ownerId: true,
+                owner: true
+            }}
+        }});
+    
+        if (!findPosition) {
+          throw new NotFoundException('position not found')
+        }
+    
+        if ((findPosition as any).company.ownerId != user_id) {
+          throw new HttpException('you are not the owner', 400)
+        }
+        
+        await this.prismaService.position.delete({ where: { slug: slug }});
+    
+        return "position deleted successfuly";
+    
+      }
 }

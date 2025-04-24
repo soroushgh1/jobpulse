@@ -53,4 +53,11 @@ export class PositionService {
         }
 
     }
+
+    async DeletePosition(slug: string, req): Promise<string> {
+
+        const result: string = await this.positionRepo.DeletePosition(slug, req.user.id);
+    
+        return result;
+    }
 }

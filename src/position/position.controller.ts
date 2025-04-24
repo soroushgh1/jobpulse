@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/Guards/auth.guard';
 import { CompanyGuard } from 'src/Guards/company.guard';
 import { PositionService } from './position.service';
@@ -35,5 +35,14 @@ export class PositionController {
         const result: string = await this.positionService.UpdatePosition(input, req.user.id, slug);
 
         return { message: result, success: true }
+    }
+
+    @Delete('delete/:id')
+    @UseGuards(AuthGuard, CompanyGuard)
+    async DeleteCompany(@Param('id') position_id: string, @Req() req): Promise<any> {
+    
+        const result: string = await this.positionService.DeletePosition(position_id, req);
+    
+        return { success: true, message: result };
     }
 }
