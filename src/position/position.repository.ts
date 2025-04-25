@@ -13,7 +13,27 @@ export class PositionRepo{
 
     async FindOnSlug(slug: string): Promise<Position | null> {
 
-        const position: Position | null = await this.prismaService.position.findUnique({ where: { slug: slug }});
+        const position: Position | null = await this.prismaService.position.findUnique({ where: { slug: slug }, 
+        select: {
+            id: true,
+            name: true,
+            degree: true,
+            description: true,
+            salary: true,
+            slug: true,
+            companyId: true,
+            company: { select: { 
+                address: true,
+                email: true,
+                id: true, 
+                slug: true, 
+                description: true, 
+                phone: true,
+                name: true,
+                pictures: true,
+                ownerId: true
+            }}
+        }});
         if (!position) throw new NotFoundException('position not found');
 
         return position;

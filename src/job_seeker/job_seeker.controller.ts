@@ -1,4 +1,21 @@
-import { Controller } from '@nestjs/common';
+import { Body, Controller, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { AuthGuard } from 'src/Guards/auth.guard';
+import { JobSeekerGuard } from 'src/Guards/job_seeker.guard';
+import { MakeRequestInput } from './DTO/job_seeker.dto';
+import { JobSeekerService } from './job_seeker.service';
 
-@Controller('job-seeker')
-export class JobSeekerController {}
+@Controller('jobseeker')
+export class JobSeekerController {
+    constructor(
+        private readonly jobSeekerService: JobSeekerService,
+    ){}
+
+    @Post(':slug/makerequest')
+    @UseGuards(AuthGuard, JobSeekerGuard)
+    async MakeRequest(@Body() input: MakeRequestInput, @Param('slug') position_slug: string, @Req() req): Promise<any> {
+
+        const result: string = await this.jobSeekerService.MakeRequest(input, position_slug, req);
+
+        return { message: result, success: true };
+    }
+}
