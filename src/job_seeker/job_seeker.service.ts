@@ -13,7 +13,7 @@ export class JobSeekerService {
 
         try {
             
-            this.jobSeekerRepo.MakeRequest(input, position_slug, req);
+            await this.jobSeekerRepo.MakeRequest(input, position_slug, req);
 
             return "requested successfull";
         } catch (err: any) {
@@ -21,4 +21,15 @@ export class JobSeekerService {
         }
     }
 
+    async DeleteRequest(position_slug: string, req): Promise<string> {
+
+        try {
+            
+            const result: string = await this.jobSeekerRepo.DeleteRequest(position_slug, req);
+
+            return result;
+        } catch (err: any) {
+            throw new HttpException(err.message, 400);
+        }
+    }
 }

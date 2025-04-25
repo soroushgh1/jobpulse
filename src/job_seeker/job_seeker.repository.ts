@@ -22,7 +22,7 @@ export class JobSeekerRepo{
             }
         })
 
-        if (isRequestExist) throw new BadRequestException('you already sent a request for this position');
+        if (isRequestExist) throw new HttpException('you already sent a request for this position', 400);
 
         const makeRequest: Request | null = await this.prismaService.request.create({ 
             data: {
@@ -35,6 +35,28 @@ export class JobSeekerRepo{
         if (!makeRequest) throw new HttpException('there is a problem in requesting for position', 500);
 
         return makeRequest;
+    }
+ 
+    async DeleteRequest(position_slug: string, req): Promise<string> {
+
+        const findPosition: Position | null = await this.positionRepo.FindOnSlug(position_slug);
+
+        const isRequestExist: Request | null = await this.prismaService.request.findFirst({
+            where: {
+                positionId: findPosition?.id,
+                userId: req.user.id
+            }
+        })
+
+        if (!isRequestExist) throw new HttpException('you did not sent a request to this position', 400);
+
+        await this.prismaService.request.delete({ 
+            where: {
+                id: isRequestExist.id
+            }
+        })
+
+        return "request deleted successfully";
     }
     
 }
