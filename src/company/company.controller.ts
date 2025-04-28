@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { CompanyService } from './company.service';
-import { CompanyRegisterInput, CompanyUpdateInput } from './DTO/company.dto';
+import { CompanyRegisterInput, CompanyUpdateInput, DenyRequestInput } from './DTO/company.dto';
 import { AuthGuard } from 'src/Guards/auth.guard';
 import { CompanyGuard } from 'src/Guards/company.guard';
 import { Company } from '@prisma/client';
@@ -49,4 +49,12 @@ export class CompanyController {
         return { companies: await this.companyService.ViewAll(), success: true };
     }
 
+    @Post('denyrequest/:request_id')
+    @UseGuards(AuthGuard, CompanyGuard)
+    async DenyRequest(@Body() input: DenyRequestInput, @Param('request_id') request_id: number, @Req() req): Promise<any> {
+
+        const result: string = await this.companyService.DenyRequest(input, request_id, req);
+
+        return { message: result, success: true };
+    }
 }

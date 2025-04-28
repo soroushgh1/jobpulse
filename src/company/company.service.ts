@@ -1,6 +1,6 @@
 import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { CompanyRepository } from './company.repository';
-import { CompanyRegisterInput, CompanyUpdateInput } from './DTO/company.dto';
+import { DenyRequestInput, CompanyRegisterInput, CompanyUpdateInput } from './DTO/company.dto';
 import { Company } from '@prisma/client';
 import { CompanyGet } from 'src/types/types';
 
@@ -81,6 +81,18 @@ export class CompanyService {
       
       return this.companyRepo.ViewAll()
 
+    } catch (err: any) {
+      throw new HttpException(err.message, 500);
+    }
+  }
+
+  async DenyRequest(input: DenyRequestInput, request_id: number, req): Promise<string> {
+
+    try {
+      
+      const result: string = await this.companyRepo.IsRequestAccepted(input.status, request_id, input.deny_reason, req);
+
+      return result;
     } catch (err: any) {
       throw new HttpException(err.message, 500);
     }

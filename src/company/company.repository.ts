@@ -1,5 +1,5 @@
-import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
-import { Company } from '@prisma/client';
+import { HttpException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Company, Position, Request } from '@prisma/client';
 import PrismaService from 'prisma/prisma.service';
 import { CompanyRegisterInput, CompanyUpdateInput } from './DTO/company.dto';
 import slugify from 'slugify';
@@ -151,4 +151,44 @@ export class CompanyRepository {
     return allCompanies;   
 
   } 
+
+  async IsRequestAccepted(status: boolean, request_id: number, deny_reason: string, req): Promise<string> {
+
+    const isRequestExist: Request | null = await this.prismaService.request.findUnique({
+      where: {
+        id: request_id
+      }
+    });
+
+    const position: Position | null = await this.prismaService.position.findUnique({
+      where: {
+        id: isRequestExist?.positionId
+      }
+    })
+
+    const company: Company | null = await this.prismaService.company.findUnique({
+      where: {
+        id: position?.companyId
+      }
+    })
+
+    if (!isRequestExist) throw new NotFoundException('request not found');
+    if (!position) throw new NotFoundException('position not found');
+    if (!company) throw new NotFoundException('company not found');
+
+    if (req.user.id != company.ownerId) throw new UnauthorizedException('you do not have access to answer this request');
+
+    await this.prismaService.request.update({
+      where: {
+        id: request_id
+      },
+      data: {
+        denyReason: deny_reason,
+        isAccept: status
+      }
+    })
+
+    return "request answered";
+  }
+
 }
