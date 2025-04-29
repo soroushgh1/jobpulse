@@ -53,10 +53,6 @@ export class CompanyUpdateInput {
 
 export class DenyRequestInput {
 
-    @IsBoolean()
-    @IsNotEmpty({ message: "status can not be empty" })
-    status: boolean;
-
     @IsString()
     @IsNotEmpty({ message: "deny_reason can not be empty" })
     deny_reason: string;

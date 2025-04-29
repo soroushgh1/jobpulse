@@ -90,7 +90,19 @@ export class CompanyService {
 
     try {
       
-      const result: string = await this.companyRepo.IsRequestAccepted(input.status, request_id, input.deny_reason, req);
+      const result: string = await this.companyRepo.IsRequestAccepted(false, request_id, req, input.deny_reason);
+
+      return result;
+    } catch (err: any) {
+      throw new HttpException(err.message, 500);
+    }
+  }
+
+  async AcceptRequest(request_id: number, req): Promise<string> {
+
+    try {
+      
+      const result: string = await this.companyRepo.IsRequestAccepted(true, request_id, req);
 
       return result;
     } catch (err: any) {

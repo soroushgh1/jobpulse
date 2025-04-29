@@ -152,7 +152,9 @@ export class CompanyRepository {
 
   } 
 
-  async IsRequestAccepted(status: boolean, request_id: number, deny_reason: string, req): Promise<string> {
+  async IsRequestAccepted(status: boolean, request_id: number,req, deny_reason?: string): Promise<string> {
+
+    if (status !== true && !deny_reason) throw new HttpException('internal error', 500);
 
     const isRequestExist: Request | null = await this.prismaService.request.findUnique({
       where: {
@@ -178,14 +180,20 @@ export class CompanyRepository {
 
     if (req.user.id != company.ownerId) throw new UnauthorizedException('you do not have access to answer this request');
 
+    const updateData: any = {};
+
+    if (status == true) updateData.isAccept = true;
+
+    if (status == false) {
+      updateData.isAccept = false,
+      updateData.denyReason = deny_reason
+    };
+
     await this.prismaService.request.update({
       where: {
         id: request_id
       },
-      data: {
-        denyReason: deny_reason,
-        isAccept: status
-      }
+      data: updateData
     })
 
     return "request answered";
