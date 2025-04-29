@@ -190,4 +190,25 @@ export class PositionRepo{
         return "position deleted successfuly";
     
       }
+
+    async ShowMyCompanyPositions(req): Promise<PositionGet[] | null> {
+
+        const company: Company | null = await this.prismaService.company.findUnique({
+            where: {
+                ownerId: req.user.id
+            }
+        });
+
+        if (!company) throw new NotFoundException('company not found');
+
+        const positions: PositionGet[] | null = await this.prismaService.position.findMany({
+            where: {
+                companyId: company.id
+            }
+        });
+
+        return positions;
+
+    }
+
 }

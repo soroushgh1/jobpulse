@@ -60,4 +60,17 @@ export class PositionService {
     
         return result;
     }
+
+    async ShowMyCompanyPositions(req): Promise<PositionGet[] | null> {
+
+        try {
+            
+            const positions: PositionGet[] | null = await this.positionRepo.ShowMyCompanyPositions(req);
+
+            return positions;
+
+        } catch (err: any) {
+            throw new HttpException(err.message, 400);
+        }
+    }
 }

@@ -45,4 +45,14 @@ export class PositionController {
     
         return { success: true, message: result };
     }
+
+    @Post('mypositions')
+    @UseGuards(AuthGuard, CompanyGuard)
+    async ShowMyCompanyPositions(@Req() req): Promise<any> {
+
+        const positions: PositionGet[] | null = await this.positionService.ShowMyCompanyPositions(req);
+
+        return { positions, success: true };
+    }
+
 }

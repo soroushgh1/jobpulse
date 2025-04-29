@@ -198,5 +198,4 @@ export class CompanyRepository {
 
     return "request answered";
   }
-
 }
