@@ -55,4 +55,11 @@ export class PositionController {
         return { positions, success: true };
     }
 
+    @Get('company/:slug')
+    async AllPositionsOfCompany(@Param('slug') company_slug: string): Promise<any> {
+
+        const positions: PositionGet[] | null = await this.positionService.AllPositionsOfCompany(company_slug);
+
+        return { positions, success: true };
+    }
 }

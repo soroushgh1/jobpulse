@@ -204,6 +204,24 @@ export class PositionRepo{
         const positions: PositionGet[] | null = await this.prismaService.position.findMany({
             where: {
                 companyId: company.id
+            },
+            select: {
+            id: true,
+            name: true,
+            degree: true,
+            description: true,
+            salary: true,
+            slug: true,
+            company: { select: { 
+                address: true,
+                email: true,
+                id: true, 
+                slug: true, 
+                description: true, 
+                phone: true,
+                name: true,
+                pictures: true,
+            }}
             }
         });
 
@@ -211,4 +229,40 @@ export class PositionRepo{
 
     }
 
+    async AllPositionOfCompany(company_slug: string): Promise<PositionGet[] | null> {
+
+        const company: Company | null = await this.prismaService.company.findUnique({
+            where: {
+                slug: company_slug
+            }
+        })
+
+        if (!company) throw new NotFoundException('company not found');
+
+        const positions: PositionGet[] | null = await this.prismaService.position.findMany({
+            where: {
+                companyId: company.id
+            },
+            select: {
+            id: true,
+            name: true,
+            degree: true,
+            description: true,
+            salary: true,
+            slug: true,
+            company: { select: { 
+                address: true,
+                email: true,
+                id: true, 
+                slug: true, 
+                description: true, 
+                phone: true,
+                name: true,
+                pictures: true,
+            }}
+            }
+        })
+
+        return positions;
+    }
 }

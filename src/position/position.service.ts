@@ -73,4 +73,18 @@ export class PositionService {
             throw new HttpException(err.message, 400);
         }
     }
+
+    async AllPositionsOfCompany(company_slug: string): Promise<PositionGet[] | null> {
+
+        try {
+            
+            const positions: PositionGet[] | null = await this.positionRepo.AllPositionOfCompany(company_slug);
+
+            return positions;
+
+        } catch (err: any) {
+            throw new HttpException(err.message, 500);
+        }
+    }
+    
 }
