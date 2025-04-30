@@ -162,20 +162,22 @@ export class CompanyRepository {
       }
     });
 
+    if (!isRequestExist) throw new NotFoundException('request not found');
+
     const position: Position | null = await this.prismaService.position.findUnique({
       where: {
-        id: isRequestExist?.positionId
+        id: isRequestExist.positionId
       }
     })
+
+    if (!position) throw new NotFoundException('position not found');
 
     const company: Company | null = await this.prismaService.company.findUnique({
       where: {
-        id: position?.companyId
+        id: position.companyId
       }
     })
 
-    if (!isRequestExist) throw new NotFoundException('request not found');
-    if (!position) throw new NotFoundException('position not found');
     if (!company) throw new NotFoundException('company not found');
 
     if (req.user.id != company.ownerId) throw new UnauthorizedException('you do not have access to answer this request');
