@@ -32,4 +32,19 @@ export class JobSeekerService {
             throw new HttpException(err.message, 400);
         }
     }
+
+    async ShowMyRequests(req): Promise<any> {
+
+        try {
+            
+            const requests: any = await this.jobSeekerRepo.ShowMyRequests(req);
+
+            return requests;
+
+        } catch (err: any) {
+
+            throw new HttpException(err.message, 400);
+        }
+
+    }
 }

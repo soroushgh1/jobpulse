@@ -27,4 +27,14 @@ export class JobSeekerController {
 
         return { message: result, success: true };
     }
+
+    @Post('myrequests')
+    @UseGuards(AuthGuard, JobSeekerGuard)
+    async ShowMyRequests(@Req() req): Promise<any> {
+
+        const requests: any = await this.jobSeekerService.ShowMyRequests(req);
+
+        return { requests, success: true };
+    }
+    
 }

@@ -59,4 +59,27 @@ export class JobSeekerRepo{
         return "request deleted successfully";
     }
     
+    async ShowMyRequests(req): Promise<any> {
+
+        const requests: any = await this.prismaService.request.findMany({
+            where: {
+                userId: req.user.id
+            },
+            select: {
+                id: true,
+                resume: true,
+                isAccept: true,
+                denyReason: true,
+                position: {
+                    select: {
+                        id: true,
+                        name: true, 
+                        slug: true
+                    }
+                }
+            }
+        });
+
+        return requests;
+    }
 }
