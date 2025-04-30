@@ -152,9 +152,9 @@ export class CompanyRepository {
 
   } 
 
-  async IsRequestAccepted(status: boolean, request_id: number,req, deny_reason?: string): Promise<string> {
+  async IsRequestAccepted(status: string, request_id: number,req, deny_reason?: string): Promise<string> {
 
-    if (status !== true && !deny_reason) throw new HttpException('internal error', 500);
+    if (status !== "accepted" && !deny_reason) throw new HttpException('internal error', 500);
 
     const isRequestExist: Request | null = await this.prismaService.request.findUnique({
       where: {
@@ -182,10 +182,10 @@ export class CompanyRepository {
 
     const updateData: any = {};
 
-    if (status == true) updateData.isAccept = true;
+    if (status == "accepted") updateData.isAccept = "accepted";
 
-    if (status == false) {
-      updateData.isAccept = false,
+    if (status == "rejected") {
+      updateData.isAccept = "rejected",
       updateData.denyReason = deny_reason
     };
 

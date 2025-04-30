@@ -51,7 +51,7 @@ model Request {
   id          Int      @id @default(autoincrement())
   resume      String
   userId      Int
-  isAccept    Boolean  @default(false)
+  isAccept    String  @default("pending")
   denyReason  String?
   positionId  Int
 

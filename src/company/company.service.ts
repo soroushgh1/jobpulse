@@ -90,7 +90,7 @@ export class CompanyService {
 
     try {
       
-      const result: string = await this.companyRepo.IsRequestAccepted(false, request_id, req, input.deny_reason);
+      const result: string = await this.companyRepo.IsRequestAccepted("rejected", request_id, req, input.deny_reason);
 
       return result;
     } catch (err: any) {
@@ -102,7 +102,7 @@ export class CompanyService {
 
     try {
       
-      const result: string = await this.companyRepo.IsRequestAccepted(true, request_id, req);
+      const result: string = await this.companyRepo.IsRequestAccepted("accepted", request_id, req);
 
       return result;
     } catch (err: any) {

@@ -62,7 +62,7 @@ export class CompanyController {
     @UseGuards(AuthGuard, CompanyGuard)
     async AcceptRequest(@Body() input: DenyRequestInput, @Param('request_id') request_id: number, @Req() req): Promise<any> {
 
-        const result: string = await this.companyService.DenyRequest(input, request_id, req);
+        const result: string = await this.companyService.AcceptRequest(request_id, req);
 
         return { message: result, success: true };
     }
