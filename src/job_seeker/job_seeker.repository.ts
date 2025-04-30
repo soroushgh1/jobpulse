@@ -1,7 +1,7 @@
-import { BadRequestException, HttpException, Injectable } from "@nestjs/common";
+import { BadRequestException, HttpException, Injectable, UnauthorizedException } from "@nestjs/common";
 import { PositionRepo } from "src/position/position.repository";
 import { MakeRequestInput } from "./DTO/job_seeker.dto";
-import { Position, Request } from "@prisma/client";
+import { Company, Position, Request } from "@prisma/client";
 import PrismaService from "prisma/prisma.service";
 
 @Injectable()
@@ -64,6 +64,40 @@ export class JobSeekerRepo{
         const requests: any = await this.prismaService.request.findMany({
             where: {
                 userId: req.user.id
+            },
+            select: {
+                id: true,
+                resume: true,
+                isAccept: true,
+                denyReason: true,
+                position: {
+                    select: {
+                        id: true,
+                        name: true, 
+                        slug: true
+                    }
+                }
+            }
+        });
+
+        return requests;
+    }
+
+    async ShowAllRequestForPosition(position_slug: string, req): Promise<any> {
+
+        const findPosition: Position | null = await this.positionRepo.FindOnSlug(position_slug);
+
+        const findCompany: Company | null = await this.prismaService.company.findUnique({
+            where: {
+                id: findPosition?.companyId
+            }
+        })
+
+        if (findCompany?.ownerId != req.user.id) throw new UnauthorizedException('you are not the owner of the company for checking the requests');
+
+        const requests: any = await this.prismaService.request.findMany({
+            where: {
+                positionId: findPosition?.id
             },
             select: {
                 id: true,

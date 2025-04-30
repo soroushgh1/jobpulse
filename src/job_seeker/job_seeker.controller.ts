@@ -3,6 +3,7 @@ import { AuthGuard } from 'src/Guards/auth.guard';
 import { JobSeekerGuard } from 'src/Guards/job_seeker.guard';
 import { MakeRequestInput } from './DTO/job_seeker.dto';
 import { JobSeekerService } from './job_seeker.service';
+import { CompanyGuard } from 'src/Guards/company.guard';
 
 @Controller('jobseeker')
 export class JobSeekerController {
@@ -33,6 +34,15 @@ export class JobSeekerController {
     async ShowMyRequests(@Req() req): Promise<any> {
 
         const requests: any = await this.jobSeekerService.ShowMyRequests(req);
+
+        return { requests, success: true };
+    }
+
+    @Post(':slug/allrequests')
+    @UseGuards(AuthGuard, CompanyGuard)
+    async ShowAllRequestForPosition(@Param('slug') position_slug: string, @Req() req): Promise<any> {
+
+        const requests: any = await this.jobSeekerService.ShowAllRequestForPosition(position_slug, req);
 
         return { requests, success: true };
     }

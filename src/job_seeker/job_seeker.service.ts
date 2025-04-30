@@ -47,4 +47,19 @@ export class JobSeekerService {
         }
 
     }
+
+    async ShowAllRequestForPosition(position_slug: string, req): Promise<any> {
+
+        try {
+            
+            const requests: any = await this.jobSeekerRepo.ShowAllRequestForPosition(position_slug, req);
+
+            return requests;
+
+        } catch (err: any) {
+
+            throw new HttpException(err.message, 400);
+        }
+
+    }
 }
