@@ -5,6 +5,7 @@ import { CompanyModule } from './company/company.module';
 import { JobSeekerModule } from './job_seeker/job_seeker.module';
 import { PositionModule } from './position/position.module';
 import { RedisModule } from './redis/redis.module';
+import Redis from 'ioredis';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { RedisModule } from './redis/redis.module';
     PositionModule,
     RedisModule,
   ],
+  exports: []
 })
 
 export class AppModule {}

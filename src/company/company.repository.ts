@@ -1,13 +1,17 @@
-import { HttpException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { HttpException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { Company, Position, Request } from '@prisma/client';
 import PrismaService from 'prisma/prisma.service';
 import { CompanyRegisterInput, CompanyUpdateInput } from './DTO/company.dto';
 import slugify from 'slugify';
 import { CompanyGet } from 'src/types/types';
+import Redis from 'ioredis';
 
 @Injectable()
 export class CompanyRepository {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    @Inject("REDIS_CLIENT") private readonly redisClient: Redis,
+  ) {}
 
   async FindOnEmail(email: string): Promise<Company | null> {
     const company: Company | null = await this.prismaService.company.findUnique(
@@ -184,11 +188,44 @@ export class CompanyRepository {
 
     const updateData: any = {};
 
-    if (status == "accepted") updateData.isAccept = "accepted";
+    if (status == "accepted") { 
+      updateData.isAccept = "accepted";
+      let userNoteJson: string | null = await this.redisClient.get(`user-${isRequestExist.userId}-note`);
+
+      if (userNoteJson === null) {
+        throw new HttpException('there is a problem in sending notification for user', 500);
+      }
+
+      let userNote: string[];
+
+      userNote = JSON.parse(userNoteJson);
+      
+      const notification: string = `your request for ${position.name} has been accepted !`;
+
+      userNote.push(notification);
+
+      await this.redisClient.set(`user-${isRequestExist.userId}-note`, JSON.stringify(userNote));
+    };
 
     if (status == "rejected") {
       updateData.isAccept = "rejected",
       updateData.denyReason = deny_reason
+
+      let userNoteJson: string | null = await this.redisClient.get(`user-${isRequestExist.userId}-note`);
+
+      if (userNoteJson === null) {
+        throw new HttpException('there is a problem in sending notification for user', 500);
+      }
+
+      let userNote: string[];
+
+      userNote = JSON.parse(userNoteJson);
+      
+      const notification: string = `your request for ${position.name} has been rejected, here is why: ${isRequestExist.denyReason}`;
+
+      userNote.push(notification);
+
+      await this.redisClient.set(`user-${isRequestExist.userId}-note`, JSON.stringify(userNote));
     };
 
     await this.prismaService.request.update({

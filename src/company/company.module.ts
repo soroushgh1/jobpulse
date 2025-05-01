@@ -6,8 +6,12 @@ import PrismaService from 'prisma/prisma.service';
 import { AuthGuard } from 'src/Guards/auth.guard';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { AuthRepository } from 'src/auth/auth.repository';
+import { RedisModule } from 'src/redis/redis.module';
 
 @Module({
+  imports: [
+    RedisModule
+  ],
   controllers: [CompanyController],
   providers: [CompanyService, CompanyRepository, PrismaService, AuthGuard, JwtService, AuthRepository]
 })

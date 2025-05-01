@@ -1,14 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import PrismaService from 'prisma/prisma.service';
 import { UserRegisterInput } from './DTO/auth.dto';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
+import Redis from 'ioredis';
 
 @Injectable()
 export class AuthRepository {
 
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    @Inject("REDIS_CLIENT") private readonly redisClient: Redis
+  ) {}
 
   async FindOnEmail(email: string): Promise<User | null> {
     const user: User | null = await this.prismaService.user.findUnique({
@@ -43,6 +47,8 @@ export class AuthRepository {
         username: input.username,
       },
     });
+
+    await this.redisClient.set(`user-${user.id}-note`, "[]");
 
     return user;
   }
