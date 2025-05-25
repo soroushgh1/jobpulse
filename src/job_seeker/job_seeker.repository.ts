@@ -1,14 +1,16 @@
-import { BadRequestException, HttpException, Injectable, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, HttpException, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import { PositionRepo } from "src/position/position.repository";
 import { MakeRequestInput } from "./DTO/job_seeker.dto";
 import { Company, Position, Request } from "@prisma/client";
 import PrismaService from "prisma/prisma.service";
+import Redis from "ioredis";
 
 @Injectable()
 export class JobSeekerRepo{
     constructor(
         private readonly positionRepo: PositionRepo,
         private readonly prismaService: PrismaService,
+        @Inject("REDIS_CLIENT") private readonly redisClient: Redis,
     ){}
 
     async MakeRequest(input: MakeRequestInput, position_slug: string, req): Promise<Request | null> {
@@ -116,4 +118,15 @@ export class JobSeekerRepo{
 
         return requests;
     }
+
+    async ShowMyNotification(user_id: number): Promise<string[]> {
+
+        const notificationJson: string | null = await this.redisClient.get(`user-${user_id}-note`);
+
+        if (!notificationJson) throw new HttpException('trouble in getting notification', 400);
+        
+        const notifications: string[] = await JSON.parse(notificationJson);
+
+        return notifications;
+    } 
 }

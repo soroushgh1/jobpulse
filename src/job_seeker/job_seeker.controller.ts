@@ -46,5 +46,15 @@ export class JobSeekerController {
 
         return { requests, success: true };
     }
+
+    @Post('mynotifications')
+    @UseGuards(AuthGuard, JobSeekerGuard)
+    async ShowMyNotification(@Req() req): Promise<any> {
+
+        const notifications: string[] = await this.jobSeekerService.ShowMyNotification(req.user.id);
+
+        return { success: true, notifications: notifications };
+        
+    }
     
 }

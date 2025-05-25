@@ -62,4 +62,19 @@ export class JobSeekerService {
         }
 
     }
+
+    async ShowMyNotification(user_id: number): Promise<string[]> {
+
+        try {
+            
+            const notifications: string[] = await this.jobSeekerRepo.ShowMyNotification(user_id);
+
+            return notifications;
+
+        } catch (err: any) {
+
+            throw new HttpException(err.message, 400);
+        }
+        
+    }
 }
