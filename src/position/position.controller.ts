@@ -37,7 +37,7 @@ export class PositionController {
         return { message: result, success: true }
     }
 
-    @Delete('delete/:id')
+    @Delete('delete/:slug')
     @UseGuards(AuthGuard, CompanyGuard)
     async DeleteCompany(@Param('id') position_id: string, @Req() req): Promise<any> {
     
