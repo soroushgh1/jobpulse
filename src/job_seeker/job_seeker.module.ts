@@ -7,12 +7,8 @@ import { JwtService } from '@nestjs/jwt';
 import { PositionRepo } from 'src/position/position.repository';
 import { JobSeekerGuard } from 'src/Guards/job_seeker.guard';
 import { AuthRepository } from 'src/auth/auth.repository';
-import { RedisModule } from 'src/redis/redis.module';
 
 @Module({
-  imports: [
-    RedisModule
-  ],
   providers: [
     JobSeekerService,
     JobSeekerRepo,

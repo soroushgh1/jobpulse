@@ -1,16 +1,18 @@
 import { HttpException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { Company, Position, Request } from '@prisma/client';
+import { Company, Position, Request, User } from '@prisma/client';
 import PrismaService from 'prisma/prisma.service';
 import { CompanyRegisterInput, CompanyUpdateInput } from './DTO/company.dto';
 import slugify from 'slugify';
 import { CompanyGet } from 'src/types/types';
 import Redis from 'ioredis';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class CompanyRepository {
   constructor(
     private readonly prismaService: PrismaService,
     @Inject("REDIS_CLIENT") private readonly redisClient: Redis,
+    private readonly mailService: MailerService,
   ) {}
 
   async FindOnEmail(email: string): Promise<Company | null> {
@@ -166,6 +168,10 @@ export class CompanyRepository {
       }
     });
 
+    const user: User | null = await this.prismaService.user.findUnique({ where: {
+      id: isRequestExist?.id
+    }});
+
     if (!isRequestExist) throw new NotFoundException('request not found');
 
     const position: Position | null = await this.prismaService.position.findUnique({
@@ -204,6 +210,19 @@ export class CompanyRepository {
 
       userNote.push(notification);
 
+      const emailMessage: string = `
+      <h1> Dear ${user?.username} </h1>
+      <br>
+      <h2> Your request for ${company.name} has been accepted ! </h2>
+      `;
+
+      await this.mailService.sendMail({
+        from: 'jobPulse',
+        to: user?.email,
+        subject: 'Request accepted !',
+        text: emailMessage
+      });
+      
       await this.redisClient.set(`user-${isRequestExist.userId}-note`, JSON.stringify(userNote));
     };
 
@@ -224,6 +243,21 @@ export class CompanyRepository {
       const notification: string = `your request for ${position.name} has been rejected, here is why: ${isRequestExist.denyReason}`;
 
       userNote.push(notification);
+
+      const emailMessage: string = `
+      <h1> Dear ${user?.username} </h1>
+      <br>
+      <h2> Unfortunately Your request for ${company.name} has been denied. </h2>
+      <br>
+      <h2> Reason : ${deny_reason} <h1>
+      `;
+
+      await this.mailService.sendMail({
+        from: 'jobPulse',
+        to: user?.email,
+        subject: 'Request denied',
+        text: emailMessage
+      });
 
       await this.redisClient.set(`user-${isRequestExist.userId}-note`, JSON.stringify(userNote));
     };
