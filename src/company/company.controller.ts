@@ -3,7 +3,6 @@ import { CompanyService } from './company.service';
 import { CompanyRegisterInput, CompanyUpdateInput, DenyRequestInput } from './DTO/company.dto';
 import { AuthGuard } from 'src/Guards/auth.guard';
 import { CompanyGuard } from 'src/Guards/company.guard';
-import { Company } from '@prisma/client';
 import { CompanyGet } from 'src/types/types';
 
 @Controller('company')
