@@ -1,10 +1,16 @@
-FROM node:24-alpine3.20
+FROM node:22-alpine3.20
 
 WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm install 
+RUN npm cache clean --force
+
+RUN npm config rm proxy 
+
+RUN npm config rm https-proxy --tried removing npm proxy 
+
+RUN npm install -v
 
 COPY . .
 

@@ -11,8 +11,13 @@ services:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}?schema=public
       - JWT_ACCESS=${JWT_ACCESS}
       - JWT_REFRESH=${JWT_REFRESH}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     depends_on:
       - database
+      - redis
+    networks:
+      - default_network
 
   database:
     image: postgres:latest
@@ -24,10 +29,25 @@ services:
       - "5432:5432"
     volumes:
       - database:/var/lib/postgresql/data
+    networks:
+      - default_network
   redis:
-    image: redis:latest
+    image: redis:8.0.2-alpine
     ports:
       - "6379:6379"
+    networks:
+      - default_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    
 
 volumes:
   database:
+
+networks:
+  default_network:
+    driver: "bridge"
+    name: "jobfinder_net"

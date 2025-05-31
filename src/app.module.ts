@@ -6,6 +6,7 @@ import { JobSeekerModule } from './job_seeker/job_seeker.module';
 import { PositionModule } from './position/position.module';
 import { RedisModule } from './redis/redis.module';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
         },
       },
     }),
+    PrismaModule,
   ],
   
   exports: []

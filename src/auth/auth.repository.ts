@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { User } from '@prisma/client';
-import PrismaService from 'prisma/prisma.service';
+import { PrismaClient, User } from '@prisma/client';
 import { UserRegisterInput } from './DTO/auth.dto';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
@@ -10,7 +9,7 @@ import Redis from 'ioredis';
 export class AuthRepository {
 
   constructor(
-    private readonly prismaService: PrismaService,
+    @Inject("PRISMA_CLIENT") private readonly prismaService: PrismaClient,
     @Inject("REDIS_CLIENT") private readonly redisClient: Redis
   ) {}
 

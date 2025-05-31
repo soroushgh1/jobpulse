@@ -1,15 +1,15 @@
 import { BadRequestException, HttpException, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import { PositionRepo } from "src/position/position.repository";
 import { MakeRequestInput } from "./DTO/job_seeker.dto";
-import { Company, Position, Request } from "@prisma/client";
-import PrismaService from "prisma/prisma.service";
+import { Company, Position, PrismaClient, Request } from "@prisma/client";
+import { prismaProvider } from "src/prisma/prisma.provider";
 import Redis from "ioredis";
 
 @Injectable()
 export class JobSeekerRepo{
     constructor(
         private readonly positionRepo: PositionRepo,
-        private readonly prismaService: PrismaService,
+        @Inject("PRISMA_CLIENT") private readonly prismaService: PrismaClient,
         @Inject("REDIS_CLIENT") private readonly redisClient: Redis,
     ){}
 

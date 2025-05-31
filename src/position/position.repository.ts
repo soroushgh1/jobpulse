@@ -1,6 +1,6 @@
-import { HttpException, Injectable, NotFoundException } from "@nestjs/common";
-import { Company, Position, User } from "@prisma/client";
-import PrismaService from "prisma/prisma.service";
+import { HttpException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { Company, Position, PrismaClient, User } from "@prisma/client";
+import { prismaProvider } from "src/prisma/prisma.provider";
 import slugify from "slugify";
 import { PositionGet } from "src/types/types";
 import { CreatePositionInput, UpdatePositionInput } from "./DTO/position.dto";
@@ -8,7 +8,7 @@ import { CreatePositionInput, UpdatePositionInput } from "./DTO/position.dto";
 @Injectable()
 export class PositionRepo{
     constructor(
-        private readonly prismaService: PrismaService,
+        @Inject("PRISMA_CLIENT") private readonly prismaService: PrismaClient,
     ) {}
 
     async FindOnSlug(slug: string): Promise<Position | null> {

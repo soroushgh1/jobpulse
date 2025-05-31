@@ -1,6 +1,5 @@
 import { HttpException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { Company, Position, Request, User } from '@prisma/client';
-import PrismaService from 'prisma/prisma.service';
+import { Company, Position, PrismaClient, Request, User } from '@prisma/client';
 import { CompanyRegisterInput, CompanyUpdateInput } from './DTO/company.dto';
 import slugify from 'slugify';
 import { CompanyGet } from 'src/types/types';
@@ -10,7 +9,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 @Injectable()
 export class CompanyRepository {
   constructor(
-    private readonly prismaService: PrismaService,
+    @Inject("PRISMA_CLIENT") private readonly prismaService: PrismaClient,
     @Inject("REDIS_CLIENT") private readonly redisClient: Redis,
     private readonly mailService: MailerService,
   ) {}
