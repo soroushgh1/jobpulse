@@ -22,7 +22,7 @@ export class CompanyGuard implements CanActivate {
     
             if(!user) throw new HttpException('there was a problem in authorization', 400);
     
-            if (user.role !== UserRole.Company) throw new UnauthorizedException('you do not have company role');
+            if (user.role !== UserRole.Company && request.user.isAdmin !== true) throw new UnauthorizedException('you do not have company role');
             
             return true
 

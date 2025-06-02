@@ -85,13 +85,13 @@ export class CompanyRepository {
 
   }
 
-  async UpdateCompany(input: CompanyUpdateInput, company_slug: string, user_id: number): Promise<Company> {
+  async UpdateCompany(input: CompanyUpdateInput, company_slug: string, user_id: number, isAdmin: boolean): Promise<Company> {
 
     const isCompanyExist: Company | null = await this.prismaService.company.findUnique({ where: { slug: company_slug }});
 
     if (!isCompanyExist) throw new HttpException('Company not found', 404);
 
-    if (isCompanyExist.ownerId != user_id) throw new HttpException('You are not the owner', 400);
+    if (isCompanyExist.ownerId != user_id && isAdmin !== true) throw new HttpException('You are not the owner', 400);
 
     let updateData: any = {
       ...input,
@@ -120,7 +120,7 @@ export class CompanyRepository {
 
   }
 
-  async DeleteCompany(slug: string, user_id: number): Promise<string> {
+  async DeleteCompany(slug: string, user_id: number, isAdmin: boolean): Promise<string> {
 
     const findCompany: Company | null = await this.prismaService.company.findUnique({ where: { slug: slug }});
 
@@ -128,7 +128,7 @@ export class CompanyRepository {
       throw new NotFoundException('company not found')
     }
 
-    if (findCompany.ownerId != user_id) {
+    if (findCompany.ownerId != user_id && isAdmin !== true) {
       throw new HttpException('you are not the owner', 400)
     }
     
@@ -189,7 +189,7 @@ export class CompanyRepository {
 
     if (!company) throw new NotFoundException('company not found');
 
-    if (req.user.id != company.ownerId) throw new UnauthorizedException('you do not have access to answer this request');
+    if (req.user.id != company.ownerId && req.user.isAdmin !== true) throw new UnauthorizedException('you do not have access to answer this request');
 
     const updateData: any = {};
 

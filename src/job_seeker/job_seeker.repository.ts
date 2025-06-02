@@ -95,7 +95,7 @@ export class JobSeekerRepo{
             }
         })
 
-        if (findCompany?.ownerId != req.user.id) throw new UnauthorizedException('you are not the owner of the company for checking the requests');
+        if (findCompany?.ownerId != req.user.id && req.user.isAdmin !== true) throw new UnauthorizedException('you are not the owner of the company for checking the requests');
 
         const requests: any = await this.prismaService.request.findMany({
             where: {

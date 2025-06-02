@@ -99,7 +99,7 @@ export class PositionRepo{
         return position;
     }
 
-    async UpdatePosition(input: UpdatePositionInput, position_slug: string, user_id: number): Promise<PositionGet | null> {
+    async UpdatePosition(input: UpdatePositionInput, position_slug: string, user_id: number, isAdmin: boolean): Promise<PositionGet | null> {
 
         const position: Position | null = await this.FindOnSlug(position_slug);
         if (!position) throw new NotFoundException('position not found for update');
@@ -107,7 +107,7 @@ export class PositionRepo{
         const company: Company | null = await this.prismaService.company.findUnique({ where: { id: position.id } });
         if (!company) throw new NotFoundException('company for position not found to update');
 
-        if (company.ownerId != user_id) throw new HttpException('you are not the owner of this position to update it', 400);
+        if (company.ownerId != user_id && isAdmin !== true) throw new HttpException('you are not the owner of this position to update it', 400);
 
         if (input.name && position.name != input.name) {
 
@@ -152,7 +152,7 @@ export class PositionRepo{
         return updatedPosition;
     }
 
-    async DeletePosition(slug: string, user_id: number): Promise<string> {
+    async DeletePosition(slug: string, user_id: number, isAdmin: boolean): Promise<string> {
 
         const findPosition: Position | null = await this.prismaService.position.findUnique({ where: { slug: slug }, 
         select: { 
@@ -181,7 +181,7 @@ export class PositionRepo{
           throw new NotFoundException('position not found')
         }
     
-        if ((findPosition as any).company.ownerId != user_id) {
+        if ((findPosition as any).company.ownerId != user_id && isAdmin !== true) {
           throw new HttpException('you are not the owner', 400)
         }
         

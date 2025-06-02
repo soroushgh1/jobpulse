@@ -21,7 +21,7 @@ export class JobSeekerGuard implements CanActivate {
     
             if(!user) throw new HttpException('there was a problem in authorization', 400);
     
-            if (user.role !== UserRole.jobSeeker) throw new UnauthorizedException('you do not have job seeker role');
+            if (user.role !== UserRole.jobSeeker && request.user.isAdmin !== true) throw new UnauthorizedException('you do not have job seeker role');
             
             return true
 

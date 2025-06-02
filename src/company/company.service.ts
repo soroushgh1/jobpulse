@@ -43,7 +43,7 @@ export class CompanyService {
 
     try {
       
-      const updateCompany: Company | null = await this.companyRepo.UpdateCompany(companyInput, company_slug, req.user.id);
+      const updateCompany: Company | null = await this.companyRepo.UpdateCompany(companyInput, company_slug, req.user.id, req.user.isAdmin);
       if (!updateCompany) throw new HttpException('there was a problem in updating company', 500);
 
       return "Company updated successfully";
@@ -71,7 +71,7 @@ export class CompanyService {
 
   async DeleteCompany(slug: string, req): Promise<string> {
 
-    const result: string = await this.companyRepo.DeleteCompany(slug, req.user.id);
+    const result: string = await this.companyRepo.DeleteCompany(slug, req.user.id, req.user.isAdmin);
 
     return result;
   }

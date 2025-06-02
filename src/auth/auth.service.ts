@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthRepository } from './auth.repository';
-import { UserLoginInput, UserRegisterInput } from './DTO/auth.dto';
+import { AdminRegisterInput, UserLoginInput, UserRegisterInput } from './DTO/auth.dto';
 import { User } from '@prisma/client';
 import { Response } from 'express';
 import * as bcrypt from 'bcryptjs';
@@ -55,7 +55,7 @@ export class AuthService {
       if (!isPassMatch)
         throw new UnauthorizedException('password or email is wrong');
 
-      const payload: object = { id: isExist.id, email: isExist.email };
+      const payload: object = { id: isExist.id, email: isExist.email, isAdmin: false };
 
       const secrets = {
         jwtaccess: this.dotenv.get<string>('JWT_ACCESS'),
@@ -136,6 +136,31 @@ export class AuthService {
       return statusObject;
 
     } catch (err: any) {
+      throw new HttpException(err.message, 400);
+    }
+  }
+
+  async RegisterAdmin(userinput: AdminRegisterInput): Promise<string> {
+
+    try {
+      
+      const isEmailExist: User | null = await this.authrepo.FindOnEmail(
+        userinput.email,
+      );
+      const isPhoneExist: User | null = await this.authrepo.FindOnPhone(
+        userinput.phone,
+      );
+
+      if (isEmailExist || isPhoneExist)
+        throw new HttpException('email or phone is used', 400);
+
+      if (userinput.adminsecret != process.env.ADMIN_SECRET) 
+        throw new HttpException('admin secret wrong', 400);
+
+      this.authrepo.CreateUser(userinput);
+
+      return "admin created successfully."
+    } catch (err) {
       throw new HttpException(err.message, 400);
     }
   }
