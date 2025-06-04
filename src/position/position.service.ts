@@ -39,11 +39,11 @@ export class PositionService {
 
     }
     
-    async UpdatePosition(input: UpdatePositionInput, user_id, position_slug): Promise<string> {
+    async UpdatePosition(input: UpdatePositionInput, user_id, isAdmin: boolean, position_slug): Promise<string> {
 
         try {
          
-            const updatedPosition: PositionGet | null = await this.positionRepo.UpdatePosition(input, position_slug, user_id);
+            const updatedPosition: PositionGet | null = await this.positionRepo.UpdatePosition(input, position_slug, user_id, isAdmin);
 
             if (!updatedPosition) throw new HttpException('there is an error in updating position', 400);
     
@@ -56,7 +56,7 @@ export class PositionService {
 
     async DeletePosition(slug: string, req): Promise<string> {
 
-        const result: string = await this.positionRepo.DeletePosition(slug, req.user.id);
+        const result: string = await this.positionRepo.DeletePosition(slug, req.user.id, req.user.isAdmin);
     
         return result;
     }
@@ -87,4 +87,16 @@ export class PositionService {
         }
     }
     
+    async SearchPositions(query:string): Promise<PositionGet[] | null | string> {
+        
+        try {
+            
+            const result: PositionGet[] | null | string = await this.positionRepo.SearchPositions(query);
+            
+            return result;
+
+        } catch (err) {
+            throw err
+        }
+    }
 }

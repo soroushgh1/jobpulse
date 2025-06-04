@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { CompanyRegisterInput, CompanyUpdateInput, DenyRequestInput } from './DTO/company.dto';
 import { AuthGuard } from 'src/Guards/auth.guard';
@@ -239,5 +239,14 @@ export class CompanyController {
     );
 
     return { message: result, success: true };
+  }
+
+  @Get('search')
+  @HttpCode(200)
+  async SearchCompanies(@Query('q') query: string): Promise<any> {
+
+    const result: CompanyGet[] | null | string = await this.companyService.SearchCompanies(query);
+
+    return { result: result, success: true };
   }
 }

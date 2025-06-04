@@ -265,4 +265,36 @@ export class PositionRepo{
 
         return positions;
     }
+
+    async SearchPositions(query: string): Promise<PositionGet[] | null | string> {
+
+        const positions: PositionGet[] | null = await this.prismaService.position.findMany({
+            where: {
+                name: { contains: query, mode: "insensitive" },
+            },
+            select: {
+            id: true,
+            name: true,
+            degree: true,
+            description: true,
+            salary: true,
+            slug: true,
+            company: { select: { 
+                address: true,
+                email: true,
+                id: true, 
+                slug: true, 
+                description: true, 
+                phone: true,
+                name: true,
+                pictures: true,
+            }}
+            }
+        });
+        if (!positions) throw new HttpException('there is a problem in searching', 500)
+
+        if (positions.length == 0) return "No position found based on your query";
+
+        return positions
+    }
 }

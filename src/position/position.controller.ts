@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/Guards/auth.guard';
 import { CompanyGuard } from 'src/Guards/company.guard';
 import { PositionService } from './position.service';
@@ -32,7 +32,7 @@ export class PositionController {
     @UseGuards(AuthGuard, CompanyGuard)
     async UpdatePosition(@Body() input: UpdatePositionInput, @Param('slug') slug: string, @Req() req): Promise<any> {
 
-        const result: string = await this.positionService.UpdatePosition(input, req.user.id, slug);
+        const result: string = await this.positionService.UpdatePosition(input, req.user.id, req.user.isAdmin, slug);
 
         return { message: result, success: true }
     }
@@ -56,10 +56,17 @@ export class PositionController {
     }
 
     @Get('company/:slug')
+    @HttpCode(200)
     async AllPositionsOfCompany(@Param('slug') company_slug: string): Promise<any> {
 
         const positions: PositionGet[] | null = await this.positionService.AllPositionsOfCompany(company_slug);
 
         return { positions, success: true };
+    }
+    @Get('search')
+    async SearchPositions(@Query('query') query: string): Promise<any> {
+        const result: PositionGet[] | null | string = await this.positionService.SearchPositions(query);
+
+        return { result: result, success: true };
     }
 }

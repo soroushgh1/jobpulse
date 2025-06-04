@@ -109,4 +109,17 @@ export class CompanyService {
       throw new HttpException(err.message, 500);
     }
   }
+
+  async SearchCompanies(query: string): Promise<CompanyGet[] | null | string> {
+
+    try {
+      
+      const result: CompanyGet[] | null | string = await this.companyRepo.SearchCompanies(query);
+
+      return result;
+      
+    } catch (err) {
+      throw err;
+    }
+  }
 }

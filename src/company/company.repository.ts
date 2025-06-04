@@ -270,4 +270,31 @@ export class CompanyRepository {
 
     return "request answered";
   }
+  async SearchCompanies(query: string): Promise<CompanyGet[] | null | string> {
+  
+    const companies: CompanyGet[] | null =
+      await this.prismaService.company.findMany({
+        where: {
+          name: { contains: query, mode: 'insensitive' },
+        },
+        select: {
+          address: true,
+          email: true,
+          id: true,
+          slug: true,
+          description: true,
+          phone: true,
+          name: true,
+          pictures: true,
+        },
+      });
+
+    if (!companies)
+      throw new HttpException('there is a problem in searching', 500);
+
+    if (companies.length == 0) return 'No company found based on your query';
+
+    return companies;
+  }
+  
 }
