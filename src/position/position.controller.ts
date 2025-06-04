@@ -20,7 +20,7 @@ export class PositionController {
         return { message: result, success: true };
     }
 
-    @Get(':slug')
+    @Get('get/:slug')
     async ShowOne(@Param('slug') slug: string): Promise<any> {
         
         const position: PositionGet | null = await this.positionService.ShowOne(slug);

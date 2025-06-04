@@ -102,7 +102,7 @@ export class CompanyController {
       message: 'company not found',
     },
   })
-  @Get(':slug')
+  @Get('get/:slug')
   @HttpCode(200)
   async ShowCompany(@Param('slug') company_slug: string): Promise<any> {
     const company: CompanyGet | null =
@@ -247,6 +247,6 @@ export class CompanyController {
 
     const result: CompanyGet[] | null | string = await this.companyService.SearchCompanies(query);
 
-    return { result: result, success: true };
+    return { result: result, success: true }
   }
 }
