@@ -1,10 +1,34 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseFilePipe,
+  ParseFilePipeBuilder,
+  Post,
+  Put,
+  Query,
+  Req,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { CompanyService } from './company.service';
-import { CompanyRegisterInput, CompanyUpdateInput, DenyRequestInput } from './DTO/company.dto';
+import {
+  CompanyRegisterInput,
+  CompanyUpdateInput,
+  DenyRequestInput,
+} from './DTO/company.dto';
 import { AuthGuard } from 'src/Guards/auth.guard';
 import { CompanyGuard } from 'src/Guards/company.guard';
 import { CompanyGet } from 'src/types/types';
 import { ApiParam, ApiResponse } from '@nestjs/swagger';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { MakeUniqueFileName } from 'src/utils/helpers';
 
 @Controller('company')
 export class CompanyController {
@@ -25,13 +49,37 @@ export class CompanyController {
     },
   })
   @Post('create')
+  @UseInterceptors(
+    FilesInterceptor('files', 5, {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, callback) => {
+          const uniqueName: string = MakeUniqueFileName(file.originalname);
+          callback(null, uniqueName);
+        },
+      }),
+    }),
+  )
   @HttpCode(201)
   @UseGuards(AuthGuard, CompanyGuard)
   async CreateCompany(
     @Body() input: CompanyRegisterInput,
     @Req() req,
+    @UploadedFiles(
+      new ParseFilePipeBuilder()
+        .addMaxSizeValidator({ maxSize: 10000 })
+        .build({
+          fileIsRequired: true,
+          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        }),
+    )
+    files: Array<Express.Multer.File>,
   ): Promise<any> {
-    const result: string = await this.companyService.CreateCompany(input, req);
+    const result: string = await this.companyService.CreateCompany(
+      input,
+      req,
+      files,
+    );
     return { message: result, success: true };
   }
 
@@ -148,10 +196,10 @@ export class CompanyController {
   @Get('')
   @ApiResponse({
     status: 200,
-    description: "Fetching all companies",
+    description: 'Fetching all companies',
     example: {
       companies: ['<company_object1>', '<company_object2>', '<company_object3'],
-      success: "true"
+      success: 'true',
     },
   })
   @ApiResponse({
@@ -244,9 +292,9 @@ export class CompanyController {
   @Get('search')
   @HttpCode(200)
   async SearchCompanies(@Query('q') query: string): Promise<any> {
+    const result: CompanyGet[] | null | string =
+      await this.companyService.SearchCompanies(query);
 
-    const result: CompanyGet[] | null | string = await this.companyService.SearchCompanies(query);
-
-    return { result: result, success: true }
+    return { result: result, success: true };
   }
 }

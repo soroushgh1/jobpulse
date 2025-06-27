@@ -7,9 +7,13 @@ import { PositionModule } from './position/position.module';
 import { RedisModule } from './redis/redis.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { PrismaModule } from './prisma/prisma.module';
+import { MulterModule } from '@nestjs/platform-express';
+import { ServeStaticModule } from "@nestjs/serve-static";
+import { join } from 'path';
 
 @Module({
   imports: [
+    
     AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
@@ -29,6 +33,13 @@ import { PrismaModule } from './prisma/prisma.module';
       },
     }),
     PrismaModule,
+    MulterModule.register({
+      dest: './uploads'
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads'
+    })
   ],
   
   exports: []

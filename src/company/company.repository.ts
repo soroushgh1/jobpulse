@@ -5,6 +5,8 @@ import slugify from 'slugify';
 import { CompanyGet } from 'src/types/types';
 import Redis from 'ioredis';
 import { MailerService } from '@nestjs-modules/mailer';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class CompanyRepository {
@@ -57,7 +59,7 @@ export class CompanyRepository {
 
   }
 
-  async CreateCompany(input: CompanyRegisterInput, owner_id): Promise<Company | null> {
+  async CreateCompany(input: CompanyRegisterInput, owner_id, pictures: Array<Express.Multer.File>): Promise<Company | null> {
 
     const baseSlug: string = await slugify(input.name, { lower: true });
     let slug: string = baseSlug;
@@ -67,6 +69,9 @@ export class CompanyRepository {
         slug = `${baseSlug}-${counter}`;
         counter++;
     }
+    let newPictures = new Array;
+    
+    pictures.forEach((picture) => newPictures.push("http://localhost:3000/"+picture.path))
 
     const company: Company | null = await this.prismaService.company.create({
         data: {
@@ -75,7 +80,7 @@ export class CompanyRepository {
             address: input.address,
             description: input.description,
             phone: input.phone,
-            pictures: input.pictures,
+            pictures: newPictures,
             slug: slug,
             ownerId: owner_id,
         },
@@ -134,6 +139,17 @@ export class CompanyRepository {
     
     await this.prismaService.company.delete({ where: { slug: slug }});
 
+    for (let picture of findCompany.pictures) {
+      let noPrefixPicture: string[] = picture.split("http://localhost:3000/");
+
+      const filePath = path.join(__dirname, '..', 'uploads', noPrefixPicture[1]);
+
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          throw new HttpException("Error in deleting files", 500);
+        }
+      });
+    }
     return "company deleted successfuly";
 
   }

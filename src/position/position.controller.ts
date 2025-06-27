@@ -12,6 +12,7 @@ export class PositionController {
     ){}
 
     @Post('create')
+    @HttpCode(201)
     @UseGuards(AuthGuard, CompanyGuard)
     async CreatePosition(@Body() input: CreatePositionInput, @Req() req): Promise<any> {
         
@@ -21,6 +22,7 @@ export class PositionController {
     }
 
     @Get('get/:slug')
+    @HttpCode(200)
     async ShowOne(@Param('slug') slug: string): Promise<any> {
         
         const position: PositionGet | null = await this.positionService.ShowOne(slug);
@@ -29,6 +31,7 @@ export class PositionController {
     }
 
     @Put('update/:slug')
+    @HttpCode(200)
     @UseGuards(AuthGuard, CompanyGuard)
     async UpdatePosition(@Body() input: UpdatePositionInput, @Param('slug') slug: string, @Req() req): Promise<any> {
 
@@ -38,6 +41,7 @@ export class PositionController {
     }
 
     @Delete('delete/:slug')
+    @HttpCode(200)
     @UseGuards(AuthGuard, CompanyGuard)
     async DeleteCompany(@Param('id') position_id: string, @Req() req): Promise<any> {
     
@@ -47,6 +51,7 @@ export class PositionController {
     }
 
     @Post('mypositions')
+    @HttpCode(200)
     @UseGuards(AuthGuard, CompanyGuard)
     async ShowMyCompanyPositions(@Req() req): Promise<any> {
 
@@ -64,6 +69,7 @@ export class PositionController {
         return { positions, success: true };
     }
     @Get('search')
+    @HttpCode(200)
     async SearchPositions(@Query('query') query: string): Promise<any> {
         const result: PositionGet[] | null | string = await this.positionService.SearchPositions(query);
 

@@ -24,9 +24,6 @@ export class CompanyRegisterInput {
         description: "array that includes pictures of the company, it should be array, even if there is only one picture",
         example: `["www.google.com/randompicture1", "www.google.com/randompicture2"]`
     })
-    @IsArray()
-    @IsNotEmpty({ message: "pictures can not be empty" })
-    pictures: string[];
 
     @ApiProperty({
         description: "real address of company",

@@ -11,7 +11,6 @@ export const redisProvider: Provider = {
       port: 6379,
     });
 
-    redis.ping().then(res => console.log('Redis connected. Ping:', res)).catch(err => console.error('Redis connection failed:', err));
     return redis;
   },
 };

@@ -187,6 +187,7 @@ export class PositionRepo{
         
         await this.prismaService.position.delete({ where: { slug: slug }});
     
+        
         return "position deleted successfuly";
     
       }

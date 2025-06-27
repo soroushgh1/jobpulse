@@ -11,6 +11,7 @@ export class CompanyService {
   async CreateCompany(
     inputcreate: CompanyRegisterInput,
     req: any,
+    files: Array<Express.Multer.File>
   ): Promise<string> {
     try {
       const ownerid: any = req.user.id;
@@ -26,7 +27,7 @@ export class CompanyService {
         throw new HttpException('phone or email is used', 400);
 
       const createdCompany: Company | null =
-        await this.companyRepo.CreateCompany(inputcreate, ownerid);
+        await this.companyRepo.CreateCompany(inputcreate, ownerid, files);
 
       if (!createdCompany)
         throw new HttpException('there is a problem in making company', 500);
