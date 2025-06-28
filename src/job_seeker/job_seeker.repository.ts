@@ -1,6 +1,5 @@
 import { BadRequestException, HttpException, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import { PositionRepo } from "src/position/position.repository";
-import { MakeRequestInput } from "./DTO/job_seeker.dto";
 import { Company, Position, PrismaClient, Request } from "@prisma/client";
 import { prismaProvider } from "src/prisma/prisma.provider";
 import Redis from "ioredis";
@@ -13,7 +12,7 @@ export class JobSeekerRepo{
         @Inject("REDIS_CLIENT") private readonly redisClient: Redis,
     ){}
 
-    async MakeRequest(input: MakeRequestInput, position_slug: string, req): Promise<Request | null> {
+    async MakeRequest(resume_file: Express.Multer.File, position_slug: string, req): Promise<Request | null> {
 
         const findPosition: Position | null = await this.positionRepo.FindOnSlug(position_slug);
 
@@ -28,7 +27,7 @@ export class JobSeekerRepo{
 
         const makeRequest: Request | null = await this.prismaService.request.create({ 
             data: {
-                resume: input.resume,
+                resume: "http://localhost:3000/"+resume_file.path,
                 userId: req.user.id,
                 positionId: (findPosition?.id as number),
             }

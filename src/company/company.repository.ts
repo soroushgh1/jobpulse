@@ -164,7 +164,6 @@ export class CompanyRepository {
     for (let picture of findCompany.pictures) {
       let noPrefixPicture: string[] = picture.split("http://localhost:3000/");
       const filePath = path.resolve(__dirname, '..', "..", noPrefixPicture[1]);
-      console.log(filePath);
       await fs.unlink(filePath);
     }
     return "company deleted successfuly";

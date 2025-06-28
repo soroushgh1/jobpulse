@@ -1,10 +1,12 @@
-import { Body, Controller, Delete, HttpCode, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, HttpCode, Param, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/Guards/auth.guard';
 import { JobSeekerGuard } from 'src/Guards/job_seeker.guard';
 import { CompanyGuard } from 'src/Guards/company.guard';
-import { MakeRequestInput } from './DTO/job_seeker.dto';
 import { JobSeekerService } from './job_seeker.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { MakeUniqueFileName } from 'src/utils/helpers';
 
 @ApiTags('jobseeker')
 @Controller('jobseeker')
@@ -18,7 +20,7 @@ export class JobSeekerController {
         type: 'string',
         description: 'Position slug to make request for',
     })
-    @ApiBody({ type: MakeRequestInput })
+    @ApiBody({ type: "file" })
     @ApiResponse({
         status: 201,
         description: 'Request created successfully',
@@ -37,9 +39,29 @@ export class JobSeekerController {
     })
     @Post(':slug/makerequest')
     @UseGuards(AuthGuard, JobSeekerGuard)
+    @UseInterceptors(FileInterceptor("file", {
+        storage: diskStorage({
+            destination: "./uploads",
+            filename(req, file, callback) {
+                const uniqueName: string = MakeUniqueFileName(file.originalname);
+                callback(null, uniqueName);
+            },
+        }),
+        limits: { fileSize: 10_000_000 },
+        fileFilter(req, file, callback) {
+            const isGoodType: boolean = file.mimetype == 'application/pdf'
+
+            if (!isGoodType) {
+                req.fileValidationErr = "Wrong type";
+                return callback(null, false);
+            }
+
+            return callback(null, true);
+        },
+    }) )
     @HttpCode(201)
-    async MakeRequest(@Body() input: MakeRequestInput, @Param('slug') position_slug: string, @Req() req): Promise<any> {
-        const result: string = await this.jobSeekerService.MakeRequest(input, position_slug, req);
+    async MakeRequest(@UploadedFile() file: Express.Multer.File, @Param('slug') position_slug: string, @Req() req): Promise<any> {
+        const result: string = await this.jobSeekerService.MakeRequest(file, position_slug, req);
         return { message: result, success: true };
     }
 
