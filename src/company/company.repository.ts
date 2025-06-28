@@ -59,7 +59,7 @@ export class CompanyRepository {
 
   }
 
-  async CreateCompany(input: CompanyRegisterInput, owner_id, pictures: Array<Express.Multer.File>): Promise<Company | null> {
+  async CreateCompany(input: CompanyRegisterInput, owner_id): Promise<Company | null> {
 
     const baseSlug: string = await slugify(input.name, { lower: true });
     let slug: string = baseSlug;
@@ -69,10 +69,7 @@ export class CompanyRepository {
         slug = `${baseSlug}-${counter}`;
         counter++;
     }
-    let newPictures = new Array;
     
-    pictures.forEach((picture) => newPictures.push("http://localhost:3000/"+picture.path))
-
     const company: Company | null = await this.prismaService.company.create({
         data: {
             name: input.name,
@@ -80,7 +77,7 @@ export class CompanyRepository {
             address: input.address,
             description: input.description,
             phone: input.phone,
-            pictures: newPictures,
+            pictures: [],
             slug: slug,
             ownerId: owner_id,
         },
@@ -88,6 +85,31 @@ export class CompanyRepository {
 
     return company;
 
+  }
+
+  async AttachPicture(files: Array<Express.Multer.File>, company_slug: string, req): Promise<string> {
+
+    const company: Company | null = await this.prismaService.company.findUnique({ where: { slug: company_slug } });
+
+    if (!company) throw new NotFoundException('Company not found');
+
+    if (company.ownerId != req.user.id) throw new UnauthorizedException('you are not the company owner');
+
+    let pictures = new Array;
+
+    files.forEach((file) => { pictures.push("http://localhost:3000/"+file.path) })
+
+    await this.prismaService.company.update({
+      where: {
+        slug: company_slug
+      },
+      data: {
+        pictures: pictures
+      }
+    })
+
+    return "Pictures attached successfully";
+    
   }
 
   async UpdateCompany(input: CompanyUpdateInput, company_slug: string, user_id: number, isAdmin: boolean): Promise<Company> {
@@ -141,7 +163,7 @@ export class CompanyRepository {
 
     for (let picture of findCompany.pictures) {
       let noPrefixPicture: string[] = picture.split("http://localhost:3000/");
-
+      console.log(noPrefixPicture)
       const filePath = path.join(__dirname, '..', 'uploads', noPrefixPicture[1]);
 
       fs.unlink(filePath, (err) => {

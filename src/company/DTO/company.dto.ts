@@ -21,11 +21,6 @@ export class CompanyRegisterInput {
     description: string;
 
     @ApiProperty({
-        description: "array that includes pictures of the company, it should be array, even if there is only one picture",
-        example: `["www.google.com/randompicture1", "www.google.com/randompicture2"]`
-    })
-
-    @ApiProperty({
         description: "real address of company",
         example: "iran, tehran, <random street>"
     })
@@ -66,13 +61,6 @@ export class CompanyUpdateInput {
     })
     @IsString()
     description: string;
-
-    @ApiProperty({
-        description: "array that includes pictures of the company, it should be array, even if there is only one picture",
-        example: `["www.google.com/randompicture1", "www.google.com/randompicture2"]`
-    })
-    @IsArray()
-    pictures: string[];
 
     @ApiProperty({
         description: "real address of company",

@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpException,
   HttpStatus,
   Param,
   ParseFilePipe,
@@ -49,6 +50,20 @@ export class CompanyController {
     },
   })
   @Post('create')
+  @HttpCode(201)
+  @UseGuards(AuthGuard, CompanyGuard)
+  async CreateCompany(
+    @Body() input: CompanyRegisterInput,
+    @Req() req
+  ): Promise<any> {
+    const result: string = await this.companyService.CreateCompany(
+      input,
+      req
+    );
+    return { message: result, success: true };
+  }
+
+  @Post('attachpicture/:slug')
   @UseInterceptors(
     FilesInterceptor('files', 5, {
       storage: diskStorage({
@@ -58,29 +73,30 @@ export class CompanyController {
           callback(null, uniqueName);
         },
       }),
+      limits: { fileSize: 10_000_000 },
+      fileFilter(req, file, callback) {
+        const isImage: boolean =
+        file.mimetype === 'image/png' ||
+        file.mimetype === 'image/jpeg' ||
+        file.mimetype === 'image/jpg';
+        if (!isImage) {
+          req.fileValidationErr = "Wrong type";
+          return callback(null, false)
+        }
+        return callback(null, true);
+      },
     }),
   )
   @HttpCode(201)
   @UseGuards(AuthGuard, CompanyGuard)
-  async CreateCompany(
-    @Body() input: CompanyRegisterInput,
-    @Req() req,
-    @UploadedFiles(
-      new ParseFilePipeBuilder()
-        .addMaxSizeValidator({ maxSize: 10000 })
-        .build({
-          fileIsRequired: true,
-          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-        }),
-    )
-    files: Array<Express.Multer.File>,
-  ): Promise<any> {
-    const result: string = await this.companyService.CreateCompany(
-      input,
-      req,
-      files,
-    );
-    return { message: result, success: true };
+  async AttachPicture(@UploadedFiles(
+  ) files: Array<Express.Multer.File>, @Param('slug') slug: string, @Req() req): Promise<any> {
+
+    if (req.fileValidationErr) return { success: false, error: req.fileValidationErr };
+
+    const result: string = await this.companyService.AttachPicture(files, slug, req)
+
+    return { success: true, result: result };
   }
 
   @Put('update/:slug')

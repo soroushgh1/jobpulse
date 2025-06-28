@@ -1,4 +1,4 @@
-import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import { HttpCode, HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { CompanyRepository } from './company.repository';
 import { DenyRequestInput, CompanyRegisterInput, CompanyUpdateInput } from './DTO/company.dto';
 import { Company } from '@prisma/client';
@@ -10,8 +10,7 @@ export class CompanyService {
 
   async CreateCompany(
     inputcreate: CompanyRegisterInput,
-    req: any,
-    files: Array<Express.Multer.File>
+    req: any
   ): Promise<string> {
     try {
       const ownerid: any = req.user.id;
@@ -27,7 +26,7 @@ export class CompanyService {
         throw new HttpException('phone or email is used', 400);
 
       const createdCompany: Company | null =
-        await this.companyRepo.CreateCompany(inputcreate, ownerid, files);
+        await this.companyRepo.CreateCompany(inputcreate, ownerid);
 
       if (!createdCompany)
         throw new HttpException('there is a problem in making company', 500);
@@ -38,6 +37,19 @@ export class CompanyService {
       throw new HttpException(err.message, 400);
     }
 
+  }
+
+  async AttachPicture(files: Array<Express.Multer.File>, company_slug: string, req): Promise<string> {
+
+    try {
+      
+      const result: string = await this.companyRepo.AttachPicture(files, company_slug, req)
+
+      return result;
+
+    } catch (err: any) {
+      throw new HttpException(err.message, 400)
+    }
   }
 
   async UpdateCompany(companyInput: CompanyUpdateInput, company_slug: string, req): Promise<string> {
