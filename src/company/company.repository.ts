@@ -5,7 +5,7 @@ import slugify from 'slugify';
 import { CompanyGet } from 'src/types/types';
 import Redis from 'ioredis';
 import { MailerService } from '@nestjs-modules/mailer';
-import * as fs from 'fs';
+import { promises as fs } from 'fs'
 import * as path from 'path';
 
 @Injectable()
@@ -163,14 +163,9 @@ export class CompanyRepository {
 
     for (let picture of findCompany.pictures) {
       let noPrefixPicture: string[] = picture.split("http://localhost:3000/");
-      console.log(noPrefixPicture)
-      const filePath = path.join(__dirname, '..', 'uploads', noPrefixPicture[1]);
-
-      fs.unlink(filePath, (err) => {
-        if (err) {
-          throw new HttpException("Error in deleting files", 500);
-        }
-      });
+      const filePath = path.resolve(__dirname, '..', "..", noPrefixPicture[1]);
+      console.log(filePath);
+      await fs.unlink(filePath);
     }
     return "company deleted successfuly";
 
