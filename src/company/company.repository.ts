@@ -95,6 +95,14 @@ export class CompanyRepository {
 
     if (company.ownerId != req.user.id) throw new UnauthorizedException('you are not the company owner');
 
+    if (company.pictures) {
+      for (let picture of company.pictures) {
+      let noPrefixPicture: string[] = picture.split("http://localhost:3000/");
+      const filePath = path.resolve(__dirname, '..', "..", noPrefixPicture[1]);
+      await fs.unlink(filePath);
+      }
+    }
+
     let pictures = new Array;
 
     files.forEach((file) => { pictures.push("http://localhost:3000/"+file.path) })

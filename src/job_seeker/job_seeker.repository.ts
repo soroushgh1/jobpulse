@@ -1,8 +1,9 @@
 import { BadRequestException, HttpException, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import { PositionRepo } from "src/position/position.repository";
 import { Company, Position, PrismaClient, Request } from "@prisma/client";
-import { prismaProvider } from "src/prisma/prisma.provider";
 import Redis from "ioredis";
+import * as path from 'path';
+import { promises as fs } from 'fs'
 
 @Injectable()
 export class JobSeekerRepo{
@@ -51,6 +52,9 @@ export class JobSeekerRepo{
 
         if (!isRequestExist) throw new HttpException('you did not sent a request to this position', 400);
 
+        let noPrefixFile: string[] = isRequestExist.resume.split("http://localhost:3000/");
+        const filePath = path.resolve(__dirname, '..', "..", noPrefixFile[1]);
+        await fs.unlink(filePath);
         await this.prismaService.request.delete({ 
             where: {
                 id: isRequestExist.id

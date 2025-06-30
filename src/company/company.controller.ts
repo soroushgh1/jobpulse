@@ -30,10 +30,14 @@ import { ApiParam, ApiResponse } from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { MakeUniqueFileName } from 'src/utils/helpers';
+import { CompanyRepository } from './company.repository';
+import { DeleteFilesInterceptor } from './DeleteFilesInterceptor.interceptor';
 
 @Controller('company')
 export class CompanyController {
-  constructor(private readonly companyService: CompanyService) {}
+  constructor(
+    private readonly companyService: CompanyService,
+    private readonly companyRepo: CompanyRepository) {}
 
   @ApiResponse({
     status: 201,
@@ -64,6 +68,7 @@ export class CompanyController {
   }
 
   @Post('attachpicture/:slug')
+  @UseGuards(AuthGuard, CompanyGuard)
   @UseInterceptors(
     FilesInterceptor('files', 5, {
       storage: diskStorage({
@@ -83,14 +88,23 @@ export class CompanyController {
           req.fileValidationErr = "Wrong type";
           return callback(null, false)
         }
+
         return callback(null, true);
       },
     }),
+
+    DeleteFilesInterceptor
   )
   @HttpCode(201)
-  @UseGuards(AuthGuard, CompanyGuard)
   async AttachPicture(@UploadedFiles(
+    new ParseFilePipeBuilder()
+    .build({
+      fileIsRequired: true,
+      errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
+    })
   ) files: Array<Express.Multer.File>, @Param('slug') slug: string, @Req() req): Promise<any> {
+
+    req.UploadedFiles = files;
 
     if (req.fileValidationErr) return { success: false, error: req.fileValidationErr };
 

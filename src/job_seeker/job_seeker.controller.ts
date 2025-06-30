@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, HttpCode, Param, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, HttpCode, HttpStatus, Param, ParseFilePipeBuilder, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/Guards/auth.guard';
 import { JobSeekerGuard } from 'src/Guards/job_seeker.guard';
@@ -7,6 +7,7 @@ import { JobSeekerService } from './job_seeker.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { MakeUniqueFileName } from 'src/utils/helpers';
+import { DeleteFileInterceptor } from 'src/company/DeleteFileInterceptor.interceptor';
 
 @ApiTags('jobseeker')
 @Controller('jobseeker')
@@ -44,23 +45,33 @@ export class JobSeekerController {
             destination: "./uploads",
             filename(req, file, callback) {
                 const uniqueName: string = MakeUniqueFileName(file.originalname);
-                callback(null, uniqueName);
+                return callback(null, uniqueName);
             },
         }),
         limits: { fileSize: 10_000_000 },
-        fileFilter(req, file, callback) {
-            const isGoodType: boolean = file.mimetype == 'application/pdf'
-
-            if (!isGoodType) {
-                req.fileValidationErr = "Wrong type";
-                return callback(null, false);
+        async fileFilter(req, file, callback) {
+            if (file.mimetype !== 'application/pdf') {
+                return callback(new BadRequestException('Only PDFs allowed'), false);
             }
 
             return callback(null, true);
         },
-    }) )
+    }),
+    DeleteFileInterceptor
+    )
     @HttpCode(201)
-    async MakeRequest(@UploadedFile() file: Express.Multer.File, @Param('slug') position_slug: string, @Req() req): Promise<any> {
+    async MakeRequest(@UploadedFile(
+        new ParseFilePipeBuilder()
+        .build({
+            fileIsRequired: true,
+            errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
+        })
+    ) file: Express.Multer.File, @Param('slug') position_slug: string, @Req() req): Promise<any> {
+        req.UploadedFiles = file;
+
+        if (req.fileValidationErr) {
+            return { error: req.fileValidationErr, success: false };
+        }
         const result: string = await this.jobSeekerService.MakeRequest(file, position_slug, req);
         return { message: result, success: true };
     }
