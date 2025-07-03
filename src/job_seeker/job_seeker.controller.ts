@@ -181,4 +181,12 @@ export class JobSeekerController {
         const notifications: string[] = await this.jobSeekerService.ShowMyNotification(req.user.id);
         return { success: true, notifications: notifications };
     }
+
+    @Post('getme')
+    @HttpCode(200)
+    async GetMe(@Req() req): Promise<any> {
+        const user = await this.jobSeekerService.GetMe(req.user.id);
+        return { success: true, user: user };
+    }
+    
 }
