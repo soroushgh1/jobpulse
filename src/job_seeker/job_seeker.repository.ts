@@ -133,7 +133,7 @@ export class JobSeekerRepo{
         return notifications;
     } 
 
-    async getMe(userId: number) {
+    async GetMe(userId: number) {
         return await prisma.user.findUnique({
                where: { id: userId },
                select: {
