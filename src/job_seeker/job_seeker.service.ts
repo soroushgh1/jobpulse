@@ -76,4 +76,13 @@ export class JobSeekerService {
         }
         
     }
+
+    async GetMe(userId: number): Promise<any> {
+        try {
+            return await this.jobSeekerRepo.GetMe(userId)
+        } catch(err: any) {
+            throw new HttpException(err.message, 400)
+        }
+    }
+    
 }
