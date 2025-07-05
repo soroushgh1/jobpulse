@@ -183,6 +183,7 @@ export class JobSeekerController {
     }
 
     @Post('getme')
+    @UseGuards(AuthGuard)
     @HttpCode(200)
     async GetMe(@Req() req): Promise<any> {
         const user = await this.jobSeekerService.GetMe(req.user.id);
