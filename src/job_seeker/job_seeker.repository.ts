@@ -134,7 +134,7 @@ export class JobSeekerRepo{
     } 
 
     async GetMe(userId: number) {
-        return await prisma.user.findUnique({
+        return await this.prisma.user.findUnique({
                where: { id: userId },
                select: {
                username: true,
