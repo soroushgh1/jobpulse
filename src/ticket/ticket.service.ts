@@ -17,9 +17,9 @@ export class TicketService {
         return result;
     }
 
-    async SeekerViewTicket(slug: string, req): Promise<Omit<Ticket, "userId" | "adminUserId">> {
+    async UserViewTicket(slug: string, req): Promise<Omit<Ticket, "userId" | "adminUserId">> {
 
-        const ticket: Omit<Ticket, "userId" | "adminUserId"> = await this.ticketRepo.SeekerViewTicket(slug, req);
+        const ticket: Omit<Ticket, "userId" | "adminUserId"> = await this.ticketRepo.UserViewTicket(slug, req);
 
         return ticket;
     }

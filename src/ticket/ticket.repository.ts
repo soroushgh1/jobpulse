@@ -35,7 +35,7 @@ export class TicketRepo {
         return { message: "your ticket created successfully.", slug: ticket.slug };
     }
 
-    async SeekerViewTicket(slug: string, req): Promise<Omit<Ticket, "userId" | "adminUserId">> {
+    async UserViewTicket(slug: string, req): Promise<Omit<Ticket, "userId" | "adminUserId">> {
 
         const ticket: Ticket | null = await this.prismaClient.ticket.findUnique({
             where: { slug: slug },

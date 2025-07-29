@@ -25,15 +25,15 @@ export class TicketController {
 
     @Post(':slug')
     @HttpCode(HttpStatus.OK)
-    @UseGuards(AuthGuard, JobSeekerGuard)
-    async SeekerViewTicket(
+    @UseGuards(AuthGuard)
+    async UserViewTicket(
         @Param('slug') slug: string,
         @Req() req,
     ) {
 
-        const result: Omit<Ticket, "userId" | "adminUserId"> = await this.tickerService.SeekerViewTicket(slug, req);
+        const result: Omit<Ticket, "userId" | "adminUserId"> = await this.tickerService.UserViewTicket(slug, req);
 
         return { ticket: result, success: true };
     }
-    
+
 }
