@@ -42,7 +42,7 @@ export class PositionRepo{
 
     async CreatePosition(input: CreatePositionInput, user_id: number): Promise<Position | null> {
 
-        const baseSlug: string = await slugify(input.name, { lower: true });
+        const baseSlug: string = slugify(input.name, { lower: true });
 
         let slug: string = baseSlug;
         let counter: number = 1;

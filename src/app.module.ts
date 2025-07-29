@@ -10,6 +10,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { ServeStaticModule } from "@nestjs/serve-static";
 import { join } from 'path';
+import { TicketModule } from './ticket/ticket.module';
 
 @Module({
   imports: [
@@ -39,7 +40,8 @@ import { join } from 'path';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
       serveRoot: '/uploads'
-    })
+    }),
+    TicketModule
   ],
   
   exports: []

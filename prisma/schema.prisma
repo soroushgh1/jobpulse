@@ -18,6 +18,8 @@ model User {
 
   company   Company?  @relation("UserCompany")
   requests  Request[]
+  tickets   Ticket[] @relation("UserTickets")
+  adminFor  Ticket[] @relation("AdminTickets")
 }
 
 model Company {
@@ -58,4 +60,20 @@ model Request {
 
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   position Position @relation(fields: [positionId], references: [id], onDelete: Cascade)
+  
+}
+
+model Ticket {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  adminUserId Int?
+  isAnswered  Boolean  @default(false)
+  subject     String
+  description String
+  slug String @unique
+
+  user       User @relation("UserTickets", fields: [userId], references: [id], onDelete: Cascade)
+  adminUser  User? @relation("AdminTickets", fields: [adminUserId], references: [id], onDelete: Cascade)
+  @@index([userId])
+  @@index([adminUserId])
 }
