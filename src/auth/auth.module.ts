@@ -19,6 +19,7 @@ import { RedisModule } from 'src/redis/redis.module';
     JwtService,
     AuthGuard,
   ],
-  imports: [PrismaModule, RedisModule]
+  imports: [PrismaModule, RedisModule],
+  exports: [AuthRepository]
 })
 export class AuthModule {}

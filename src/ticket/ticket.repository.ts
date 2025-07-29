@@ -1,4 +1,4 @@
-import { HttpException, Inject, Injectable } from "@nestjs/common";
+import { HttpException, Inject, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { PrismaClient, Ticket } from "@prisma/client";
 import { TicketMakeDto } from "./DTO/ticket.dto";
 import slugify from "slugify";
@@ -33,5 +33,19 @@ export class TicketRepo {
         if (!ticket) throw new HttpException('there was a problem while creating your ticket.', 400);
 
         return { message: "your ticket created successfully.", slug: ticket.slug };
+    }
+
+    async SeekerViewTicket(slug: string, req): Promise<Omit<Ticket, "userId" | "adminUserId">> {
+
+        const ticket: Ticket | null = await this.prismaClient.ticket.findUnique({
+            where: { slug: slug },
+        });
+
+        if (!ticket) throw new NotFoundException('ticket not found');
+        if (ticket.userId != req.user.id) throw new UnauthorizedException('you can not access other people tickets');
+
+        const { userId, adminUserId, ...safeTicket } = ticket;
+        
+        return safeTicket;
     }
 }

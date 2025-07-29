@@ -1,7 +1,9 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { TicketService } from './ticket.service';
 import { AuthGuard } from 'src/Guards/auth.guard';
 import { TicketMakeDto } from './DTO/ticket.dto';
+import { JobSeekerGuard } from 'src/Guards/job_seeker.guard';
+import { Ticket } from '@prisma/client';
 
 @Controller('ticket')
 export class TicketController {
@@ -20,4 +22,18 @@ export class TicketController {
 
         return { slug: result.slug, message: result.message };
     }
+
+    @Post(':slug')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(AuthGuard, JobSeekerGuard)
+    async SeekerViewTicket(
+        @Param('slug') slug: string,
+        @Req() req,
+    ) {
+
+        const result: Omit<Ticket, "userId" | "adminUserId"> = await this.tickerService.SeekerViewTicket(slug, req);
+
+        return { ticket: result, success: true };
+    }
+    
 }

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { TicketRepo } from './ticket.repository';
 import { TicketMakeDto } from './DTO/ticket.dto';
+import { Ticket } from '@prisma/client';
 
 @Injectable()
 export class TicketService {
@@ -16,4 +17,10 @@ export class TicketService {
         return result;
     }
 
+    async SeekerViewTicket(slug: string, req): Promise<Omit<Ticket, "userId" | "adminUserId">> {
+
+        const ticket: Omit<Ticket, "userId" | "adminUserId"> = await this.ticketRepo.SeekerViewTicket(slug, req);
+
+        return ticket;
+    }
 }
