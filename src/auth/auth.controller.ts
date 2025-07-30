@@ -1,5 +1,5 @@
 import { Body, Controller, HttpCode, Post, Req, Res, UseGuards } from '@nestjs/common';
-import { UserLoginInput, UserRegisterInput } from './DTO/auth.dto';
+import { AdminLoginInput, AdminRegisterInput, UserLoginInput, UserRegisterInput } from './DTO/auth.dto';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { ApiResponse } from '@nestjs/swagger';
@@ -98,4 +98,66 @@ export class AuthController {
   async AuthStatus(@Req() req): Promise<any> {
     return this.authservice.GetAuthStatus(req);
   }
+
+  @HttpCode(200)
+  @Post('logout')
+  LogOut(
+    @Res() res: Response
+  ): any {
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
+
+    res.status(200).json({ message: "logout successful", success: true });
+  } 
+
+  @ApiResponse({
+    status: 201,
+    example: {
+      message: 'admin created successfully.',
+      success: 'true',
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    example: {
+      message: [
+        'minimum length of phone is 12',
+        'phone can not be empty',
+        'phone must be a string',
+        'secret can not be empty'
+      ],
+      error: 'Bad Request',
+      statusCode: 400,
+    },
+  })
+  @Post('masterkeyup')
+  @HttpCode(201)
+  async RegisterAdmin(@Body() admininput: AdminRegisterInput): Promise<any> {
+    const result: string = await this.authservice.RegisterAdmin(admininput);
+    return { message: result, success: true };
+  }
+
+  @ApiResponse({
+    status: 200,
+    example: {
+      message: 'login successfull',
+      success: 'true',
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    example: {
+      statusCode: 500,
+      message: 'user not found',
+    },
+  })
+  @Post('masterkeyin')
+  async LoginAdmin(
+    @Body() admininput: AdminLoginInput,
+    @Res() res: Response,
+  ): Promise<any> {
+    const result: string = await this.authservice.LoginAdmin(admininput, res);
+    res.status(200).json({ message: result, success: true });
+  }
+
 }

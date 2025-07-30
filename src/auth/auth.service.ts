@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthRepository } from './auth.repository';
-import { AdminRegisterInput, UserLoginInput, UserRegisterInput } from './DTO/auth.dto';
+import { AdminLoginInput, AdminRegisterInput, UserLoginInput, UserRegisterInput } from './DTO/auth.dto';
 import { User } from '@prisma/client';
 import { Response } from 'express';
 import * as bcrypt from 'bcryptjs';
@@ -164,4 +164,57 @@ export class AuthService {
       throw new HttpException(err.message, 400);
     }
   }
+
+  async LoginAdmin(input: AdminLoginInput, res: Response): Promise<string> {
+
+      const isEmailExist: User | null = await this.authrepo.FindOnEmail(
+        input.email,
+      );
+
+      if (!isEmailExist)
+        throw new NotFoundException('user not found');
+
+      if (input.adminsecret != process.env.ADMIN_SECRET) 
+        throw new HttpException('admin secret wrong', 400);
+
+      const isPassMatch: boolean = await bcrypt.compare(
+        input.password,
+        isEmailExist.password,
+      );
+
+      if (!isPassMatch)
+        throw new UnauthorizedException('password or email is wrong');
+
+      const payload: object = { id: isEmailExist.id, email: isEmailExist.email, isAdmin: true };
+
+      const secrets = {
+        jwtaccess: this.dotenv.get<string>('JWT_ACCESS'),
+        jwtrefresh: this.dotenv.get<string>('JWT_REFRESH'),
+      };
+
+      const accessToken: string = this.jwtservice.sign(payload, {
+        secret: secrets.jwtaccess,
+        expiresIn: '1h',
+      });
+      const refreshToken: string = this.jwtservice.sign(payload, {
+        secret: secrets.jwtrefresh,
+        expiresIn: '90d',
+      });
+
+      res.cookie('accessToken', accessToken, {
+        maxAge: 3600000,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+      });
+      res.cookie('refreshToken', refreshToken, {
+        maxAge: 7776000000,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+      });
+
+      return 'Login was successful';
+  }
+  
 }

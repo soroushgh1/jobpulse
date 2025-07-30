@@ -118,3 +118,26 @@ export class AdminRegisterInput {
   @IsNotEmpty({ message: 'admin secret cannot be empty' })
   adminsecret: string;
 }
+
+export class AdminLoginInput {
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty({ message: 'email can not be empty' })
+  @IsEmail({}, { message: 'email format is invalid' })
+  email: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty({ message: 'password can not be empty' })
+  @MinLength(8, { message: 'minimum length of password is 8' })
+  password: string;
+
+  @ApiProperty({
+    description: `required secret for admin route`
+  })
+  @IsString()
+  @IsNotEmpty({ message: 'admin secret cannot be empty' })
+  adminsecret: string;
+  
+}
