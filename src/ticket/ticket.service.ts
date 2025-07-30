@@ -23,4 +23,10 @@ export class TicketService {
 
         return ticket;
     }
+
+    async AdminViewTickets(): Promise<Omit<Ticket, "userId" | "adminUserId">[]> {
+        const tickets: Omit<Ticket, "userId" | "adminUserId">[] = await this.ticketRepo.AdminViewTickets();
+
+        return tickets;
+    }
 }

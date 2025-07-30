@@ -2,13 +2,13 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Req, UseGuard
 import { TicketService } from './ticket.service';
 import { AuthGuard } from 'src/Guards/auth.guard';
 import { TicketMakeDto } from './DTO/ticket.dto';
-import { JobSeekerGuard } from 'src/Guards/job_seeker.guard';
 import { Ticket } from '@prisma/client';
+import { AdminGuard } from 'src/Guards/admin.guard';
 
 @Controller('ticket')
 export class TicketController {
     constructor(
-        private readonly tickerService: TicketService,
+        private readonly ticketService: TicketService,
     ) {}
 
     @Post('create')
@@ -18,9 +18,19 @@ export class TicketController {
         @Body() input: TicketMakeDto,
         @Req() req,
     ) {
-        const result: Record<string, string> = await this.tickerService.CreateTicket(input, req);
+        const result: Record<string, string> = await this.ticketService.CreateTicket(input, req);
 
         return { slug: result.slug, message: result.message };
+    }
+
+    @Post('alltickets')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(AuthGuard, AdminGuard)
+    async AdminViewTickets() {
+
+        const result: Omit<Ticket, "userId" | "adminUserId">[] = await this.ticketService.AdminViewTickets();
+
+        return { tickets: result, success: true };
     }
 
     @Post(':slug')
@@ -31,9 +41,8 @@ export class TicketController {
         @Req() req,
     ) {
 
-        const result: Omit<Ticket, "userId" | "adminUserId"> = await this.tickerService.UserViewTicket(slug, req);
+        const result: Omit<Ticket, "userId" | "adminUserId"> = await this.ticketService.UserViewTicket(slug, req);
 
         return { ticket: result, success: true };
     }
-
 }

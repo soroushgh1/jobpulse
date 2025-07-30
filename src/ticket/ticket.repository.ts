@@ -42,10 +42,27 @@ export class TicketRepo {
         });
 
         if (!ticket) throw new NotFoundException('ticket not found');
-        if (ticket.userId != req.user.id) throw new UnauthorizedException('you can not access other people tickets');
+        if (ticket.userId != req.user.id && req.user.isAdmin == false) throw new UnauthorizedException('you can not access other people tickets');
 
         const { userId, adminUserId, ...safeTicket } = ticket;
         
         return safeTicket;
+    }
+
+    async AdminViewTickets(): Promise<Omit<Ticket, "userId" | "adminUserId">[]> {
+
+        const tickets: Omit<Ticket, "userId" | "adminUserId">[] | null = await this.prismaClient.ticket.findMany({
+            select: {
+                slug: true,
+                subject: true,
+                description: true,
+                isAnswered: true,
+                id: true
+            }
+        });
+
+        if (!tickets) return [];
+
+        return tickets;
     }
 }
