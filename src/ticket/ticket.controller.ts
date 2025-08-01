@@ -67,6 +67,18 @@ export class TicketController {
         return { message: result, success: true };
     }
 
+    @ApiResponse(docs.myTicketsOK)
+    @Post('mytickets')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(AuthGuard)
+    async MyTickets(
+        @Req() req
+    ): Promise<any> {
+        const tickets: Omit<Ticket, "userId" | "adminUserId">[] = await this.ticketService.MyTickets(req);
+
+        return { tickets, success: true };
+    }
+
     @ApiResponse(docs.userViewTicketOK)
     @ApiResponse(docs.userViewTicketNotFound)
     @Post(':slug')

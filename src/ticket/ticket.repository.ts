@@ -136,4 +136,25 @@ export class TicketRepo {
         return "message sent"
     }
 
+    async MyTickets(req): Promise<Omit<Ticket, "userId" | "adminUserId">[] > {
+
+        const tickets: Omit<Ticket, "userId" | "adminUserId">[] | null = await this.prismaClient.ticket.findMany({
+            where: {
+                OR: [
+                    { userId: req.user.id },
+                    { adminUserId: req.user.id }
+                ]
+            },
+            select: {
+                slug: true,
+                subject: true,
+                description: true,
+                isAnswered: true,
+                id: true
+            }
+        });
+
+        return tickets;
+    }
+
 }

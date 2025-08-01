@@ -99,3 +99,26 @@ export const messageBAD = {
     message: 'replyed message not found',
   },
 };
+
+export const myTicketsOK = {
+  status: 200,
+  example: {
+    ticket: [
+      {
+      id: 1,
+      slug: 'my-ticket-slug-1',
+      subject: 'Login Issue',
+      description: 'Cannot login with valid credentials',
+      isAnswered: false,
+      },
+      {
+      id: 1,
+      slug: 'my-ticket-slug-2',
+      subject: 'resume Issue',
+      description: 'Cannot send resume',
+      isAnswered: true,
+      }
+    ],
+    success: true,
+  },
+};
