@@ -29,4 +29,10 @@ export class TicketService {
 
         return tickets;
     }
+
+    async AdminAttach(req, ticket_slug: string): Promise<string> {
+        const result: string = await this.ticketRepo.AdminAttach(req, ticket_slug);
+
+        return result;
+    }
 }

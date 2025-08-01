@@ -65,4 +65,25 @@ export class TicketRepo {
 
         return tickets;
     }
+
+    async AdminAttach(req, ticket_slug: string): Promise<string> {
+
+        const findTicket: Ticket | null = await this.prismaClient.ticket.findUnique({ where: {
+            slug: ticket_slug
+        }});
+
+        if (!findTicket) throw new NotFoundException('ticket not found');
+
+        await this.prismaClient.ticket.update({
+            where: {
+                slug: ticket_slug
+            },
+            data: {
+                isAnswered: true,
+                adminUserId: req.user.id
+            }
+        });
+
+        return "ticket attached";
+    }
 }

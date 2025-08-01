@@ -77,3 +77,22 @@ model Ticket {
   @@index([userId])
   @@index([adminUserId])
 }
+
+model Conversation {
+  id Int @id @default(autoincrement())
+  messages Message[]
+}
+
+model Message {
+  id Int @id @default(autoincrement())
+  text String
+  created_at String
+
+  replay_to_id Int?
+  replay_to Message? @relation("replayTo", fields: [replay_to_id], references: [id], onDelete: Cascade)
+
+  conversation_id Int 
+  conversation Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+
+  replies Message[] @relation("replayTo")
+}

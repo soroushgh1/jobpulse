@@ -38,6 +38,20 @@ export class TicketController {
         return { tickets: result, success: true };
     }
 
+    @ApiResponse(docs.attachTicketOK)
+    @ApiResponse(docs.attachTicketBAD)
+    @HttpCode(HttpStatus.OK)
+    @Post('attach/:slug')
+    @UseGuards(AuthGuard, AdminGuard)
+    async AdminAttach(
+        @Param('slug') ticket_slug: string,
+        @Req() req
+    ): Promise<any> {
+        const result: string = await this.ticketService.AdminAttach(req, ticket_slug);
+
+        return { message: result, success: true };
+    }
+
     @ApiResponse(docs.userViewTicketOK)
     @ApiResponse(docs.userViewTicketNotFound)
     @Post(':slug')

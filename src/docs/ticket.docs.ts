@@ -67,3 +67,19 @@ export const userViewTicketUnauthorized = {
     message: 'you can not access other people tickets',
   },
 };
+
+export const attachTicketOK = {
+  status: 200,
+  example: {
+    message: 'ticket attached',
+    success: true,
+  },
+};
+
+export const attachTicketBAD = {
+  status: 404,
+  example: {
+    statusCode: 404,
+    message: 'ticket not found',
+  },
+};
