@@ -12,8 +12,6 @@ export class CompanyGuard implements CanActivate {
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         
-        try {
-            
             const request = context.switchToHttp().getRequest();
 
             const userId = request.user.id;
@@ -25,9 +23,5 @@ export class CompanyGuard implements CanActivate {
             if (user.role !== UserRole.Company && request.user.isAdmin !== true) throw new UnauthorizedException('you do not have company role');
             
             return true
-
-        } catch (err: any) {
-            throw new HttpException(err.message, 400);
-        }
     }
 }

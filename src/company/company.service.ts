@@ -12,7 +12,6 @@ export class CompanyService {
     inputcreate: CompanyRegisterInput,
     req: any
   ): Promise<string> {
-    try {
       const ownerid: any = req.user.id;
 
       const isExistEmail: Company | null = await this.companyRepo.FindOnEmail(
@@ -33,42 +32,26 @@ export class CompanyService {
 
       return "company created successfully";
 
-    } catch (err: any) {
-      throw new HttpException(err.message, 400);
-    }
-
   }
 
   async AttachPicture(files: Array<Express.Multer.File>, company_slug: string, req): Promise<string> {
-
-    try {
       
       const result: string = await this.companyRepo.AttachPicture(files, company_slug, req)
 
       return result;
 
-    } catch (err: any) {
-      throw new HttpException(err.message, 400)
-    }
   }
 
   async UpdateCompany(companyInput: CompanyUpdateInput, company_slug: string, req): Promise<string> {
-
-    try {
       
       const updateCompany: Company | null = await this.companyRepo.UpdateCompany(companyInput, company_slug, req.user.id, req.user.isAdmin);
       if (!updateCompany) throw new HttpException('there was a problem in updating company', 500);
 
       return "Company updated successfully";
 
-    } catch (err: any) {
-      throw new HttpException(err.message, 500);
-    }
   }
 
   async ShowCompany(slug: string): Promise<CompanyGet | null> {
-
-    try {
       
       const company: CompanyGet | null = await this.companyRepo.FindOnSlug(slug);
 
@@ -77,9 +60,6 @@ export class CompanyService {
       }
 
       return company;
-    } catch (err: any) {
-      throw new HttpException(err.message, 500)
-    }
   }
 
   async DeleteCompany(slug: string, req): Promise<string> {
@@ -90,49 +70,27 @@ export class CompanyService {
   }
 
   async ViewAll(): Promise<CompanyGet[] | null> {
-    try {
-      
       return this.companyRepo.ViewAll()
-
-    } catch (err: any) {
-      throw new HttpException(err.message, 500);
-    }
   }
 
   async DenyRequest(input: DenyRequestInput, request_id: number, req): Promise<string> {
-
-    try {
       
       const result: string = await this.companyRepo.IsRequestAccepted("rejected", request_id, req, input.deny_reason);
 
       return result;
-    } catch (err: any) {
-      throw new HttpException(err.message, 500);
-    }
   }
 
   async AcceptRequest(request_id: number, req): Promise<string> {
 
-    try {
-      
       const result: string = await this.companyRepo.IsRequestAccepted("accepted", request_id, req);
 
       return result;
-    } catch (err: any) {
-      throw new HttpException(err.message, 500);
-    }
   }
 
   async SearchCompanies(query: string): Promise<CompanyGet[] | null | string> {
 
-    try {
-      
       const result: CompanyGet[] | null | string = await this.companyRepo.SearchCompanies(query);
 
       return result;
-      
-    } catch (err) {
-      throw err;
-    }
   }
 }

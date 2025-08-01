@@ -3,30 +3,14 @@ import { AdminLoginInput, AdminRegisterInput, UserLoginInput, UserRegisterInput 
 import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { ApiResponse } from '@nestjs/swagger';
+import * as docs from 'src/docs/auth.docs';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authservice: AuthService) {}
 
-  @ApiResponse({
-    status: 201,
-    example: {
-      message: 'user created successfully.',
-      success: 'true',
-    },
-  })
-  @ApiResponse({
-    status: 400,
-    example: {
-      message: [
-        'minimum length of phone is 12',
-        'phone can not be empty',
-        'phone must be a string',
-      ],
-      error: 'Bad Request',
-      statusCode: 400,
-    },
-  })
+  @ApiResponse(docs.registerOK)
+  @ApiResponse(docs.registerBAD)
   @Post('register')
   @HttpCode(201)
   async Register(@Body() userinput: UserRegisterInput): Promise<any> {
@@ -34,20 +18,8 @@ export class AuthController {
     return { message: result, success: true };
   }
 
-  @ApiResponse({
-    status: 200,
-    example: {
-      message: 'login successfull',
-      success: 'true',
-    },
-  })
-  @ApiResponse({
-    status: 500,
-    example: {
-      statusCode: 500,
-      message: 'user not found',
-    },
-  })
+  @ApiResponse(docs.loginOK)
+  @ApiResponse(docs.loginBAD)
   @Post('login')
   async Login(
     @Body() userinput: UserLoginInput,
@@ -57,20 +29,8 @@ export class AuthController {
     res.status(200).json({ message: result, success: true });
   }
 
-  @ApiResponse({
-    status: 200,
-    example: {
-      message: 'access token attached successfully.',
-      success: 'true',
-    },
-  })
-  @ApiResponse({
-    status: 500,
-    example: {
-      statusCode: 500,
-      message: 'no refresh token found',
-    },
-  })
+  @ApiResponse(docs.refreshOK)
+  @ApiResponse(docs.refreshBAD)
   @HttpCode(200)
   @Post('refresh')
   async RefreshJWT(@Req() req, @Res() res): Promise<any> {
@@ -79,20 +39,8 @@ export class AuthController {
     res.status(200).json({ message: result, success: true });
   }
 
-  @ApiResponse({
-    status: 200,
-    example: {
-        access_token: "<token>",
-        refresh_token: "<token>"
-    }
-  })
-  @ApiResponse({
-    status: 500,
-    example: {
-      statusCode: 500,
-      message: 'no refresh token found',
-    },
-  })
+  @ApiResponse(docs.authStatusOK)
+  @ApiResponse(docs.authStatusBAD)
   @HttpCode(200)
   @Post('status')
   async AuthStatus(@Req() req): Promise<any> {
@@ -110,26 +58,8 @@ export class AuthController {
     res.status(200).json({ message: "logout successful", success: true });
   } 
 
-  @ApiResponse({
-    status: 201,
-    example: {
-      message: 'admin created successfully.',
-      success: 'true',
-    },
-  })
-  @ApiResponse({
-    status: 400,
-    example: {
-      message: [
-        'minimum length of phone is 12',
-        'phone can not be empty',
-        'phone must be a string',
-        'secret can not be empty'
-      ],
-      error: 'Bad Request',
-      statusCode: 400,
-    },
-  })
+  @ApiResponse(docs.adminRegisterOK)
+  @ApiResponse(docs.adminRegisterBAD)
   @Post('masterkeyup')
   @HttpCode(201)
   async RegisterAdmin(@Body() admininput: AdminRegisterInput): Promise<any> {
@@ -137,20 +67,8 @@ export class AuthController {
     return { message: result, success: true };
   }
 
-  @ApiResponse({
-    status: 200,
-    example: {
-      message: 'login successfull',
-      success: 'true',
-    },
-  })
-  @ApiResponse({
-    status: 500,
-    example: {
-      statusCode: 500,
-      message: 'user not found',
-    },
-  })
+  @ApiResponse(docs.adminLoginOK)
+  @ApiResponse(docs.adminLoginBAD)
   @Post('masterkeyin')
   async LoginAdmin(
     @Body() admininput: AdminLoginInput,
@@ -159,5 +77,4 @@ export class AuthController {
     const result: string = await this.authservice.LoginAdmin(admininput, res);
     res.status(200).json({ message: result, success: true });
   }
-
 }

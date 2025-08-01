@@ -4,6 +4,8 @@ import { AuthGuard } from 'src/Guards/auth.guard';
 import { TicketMakeDto } from './DTO/ticket.dto';
 import { Ticket } from '@prisma/client';
 import { AdminGuard } from 'src/Guards/admin.guard';
+import * as docs from "src/docs/ticket.docs";
+import { ApiResponse } from '@nestjs/swagger';
 
 @Controller('ticket')
 export class TicketController {
@@ -11,6 +13,8 @@ export class TicketController {
         private readonly ticketService: TicketService,
     ) {}
 
+    @ApiResponse(docs.createTicketCreated)
+    @ApiResponse(docs.createTicketBadRequest)
     @Post('create')
     @HttpCode(HttpStatus.CREATED)
     @UseGuards(AuthGuard)
@@ -20,9 +24,10 @@ export class TicketController {
     ) {
         const result: Record<string, string> = await this.ticketService.CreateTicket(input, req);
 
-        return { slug: result.slug, message: result.message };
+        return { slug: result.slug, message: result.message, success: true };
     }
 
+    @ApiResponse(docs.adminViewTicketsOK)
     @Post('alltickets')
     @HttpCode(HttpStatus.OK)
     @UseGuards(AuthGuard, AdminGuard)
@@ -33,6 +38,8 @@ export class TicketController {
         return { tickets: result, success: true };
     }
 
+    @ApiResponse(docs.userViewTicketOK)
+    @ApiResponse(docs.userViewTicketNotFound)
     @Post(':slug')
     @HttpCode(HttpStatus.OK)
     @UseGuards(AuthGuard)

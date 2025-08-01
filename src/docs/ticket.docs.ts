@@ -1,0 +1,69 @@
+export const createTicketCreated = {
+  status: 201,
+  example: {
+    slug: 'my-ticket-slug-1',
+    message: 'your ticket created successfully.',
+    success: true,
+  },
+};
+
+export const createTicketBadRequest = {
+  status: 400,
+  example: {
+    statusCode: 400,
+    message: 'there was a problem while creating your ticket.',
+  },
+};
+
+export const adminViewTicketsOK = {
+  status: 200,
+  example: {
+    tickets: [
+      {
+        id: 1,
+        slug: 'my-ticket-slug-1',
+        subject: 'Login Issue',
+        description: 'Cannot login with valid credentials',
+        isAnswered: false,
+      },
+      {
+        id: 2,
+        slug: 'my-ticket-slug-2',
+        subject: 'Bug report',
+        description: 'App crashes on startup',
+        isAnswered: true,
+      },
+    ],
+    success: true,
+  },
+};
+
+export const userViewTicketOK = {
+  status: 200,
+  example: {
+    ticket: {
+      id: 1,
+      slug: 'my-ticket-slug-1',
+      subject: 'Login Issue',
+      description: 'Cannot login with valid credentials',
+      isAnswered: false,
+    },
+    success: true,
+  },
+};
+
+export const userViewTicketNotFound = {
+  status: 404,
+  example: {
+    statusCode: 404,
+    message: 'ticket not found',
+  },
+};
+
+export const userViewTicketUnauthorized = {
+  status: 401,
+  example: {
+    statusCode: 401,
+    message: 'you can not access other people tickets',
+  },
+};

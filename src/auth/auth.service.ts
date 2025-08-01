@@ -21,7 +21,6 @@ export class AuthService {
   ) {}
 
   async Register(userinput: UserRegisterInput): Promise<string> {
-    try {
       const isEmailExist: User | null = await this.authrepo.FindOnEmail(
         userinput.email,
       );
@@ -35,13 +34,10 @@ export class AuthService {
       this.authrepo.CreateUser(userinput);
 
       return 'user created successfully';
-    } catch (err: any) {
-      throw new HttpException(err.message, 500);
-    }
   }
 
   async Login(userinput: UserLoginInput, res: Response): Promise<string> {
-    try {
+
       const isExist: User | null = await this.authrepo.FindOnEmail(
         userinput.email,
       );
@@ -85,13 +81,10 @@ export class AuthService {
       });
 
       return 'Login was successful';
-    } catch (err: any) {
-      throw new HttpException(err.message, 500);
-    }
   }
 
   async GetRefreshJWT(req: any, res: any): Promise<string> {
-    try {
+
       const refreshToken: string = req.cookies['refreshToken'];
       if (!refreshToken)
         throw new UnauthorizedException('no refresh token found');
@@ -118,13 +111,11 @@ export class AuthService {
       });
 
       return 'access token attached successfully';
-    } catch (err: any) {
-      throw new HttpException(err.message, 500);
-    }
+    
   }
 
   async GetAuthStatus(req: any): Promise<any> {
-    try {
+    
       const statusObject: any = { access_token: false, refresh_token: false };
 
       const accessToken: string = req.cookies['accessToken'];
@@ -134,15 +125,9 @@ export class AuthService {
       if(refreshToken) statusObject.refresh_token = true;
 
       return statusObject;
-
-    } catch (err: any) {
-      throw new HttpException(err.message, 400);
-    }
   }
 
   async RegisterAdmin(userinput: AdminRegisterInput): Promise<string> {
-
-    try {
       
       const isEmailExist: User | null = await this.authrepo.FindOnEmail(
         userinput.email,
@@ -160,9 +145,6 @@ export class AuthService {
       this.authrepo.CreateUser(userinput);
 
       return "admin created successfully."
-    } catch (err) {
-      throw new HttpException(err.message, 400);
-    }
   }
 
   async LoginAdmin(input: AdminLoginInput, res: Response): Promise<string> {

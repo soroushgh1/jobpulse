@@ -4,6 +4,8 @@ import { CompanyGuard } from 'src/Guards/company.guard';
 import { PositionService } from './position.service';
 import { PositionGet } from 'src/types/types';
 import { CreatePositionInput, UpdatePositionInput } from './DTO/position.dto';
+import * as docs from 'src/docs/position.docs';
+import { ApiResponse } from '@nestjs/swagger';
 
 @Controller('position')
 export class PositionController {
@@ -14,6 +16,8 @@ export class PositionController {
     @Post('create')
     @HttpCode(201)
     @UseGuards(AuthGuard, CompanyGuard)
+    @ApiResponse(docs.createPositionOK)
+    @ApiResponse(docs.createPositionBAD)
     async CreatePosition(@Body() input: CreatePositionInput, @Req() req): Promise<any> {
         
         const result: string = await this.positionService.CreatePosition(input, req)
@@ -23,6 +27,8 @@ export class PositionController {
 
     @Get('get/:slug')
     @HttpCode(200)
+    @ApiResponse(docs.showOneOK)
+    @ApiResponse(docs.showOneNotFound)
     async ShowOne(@Param('slug') slug: string): Promise<any> {
         
         const position: PositionGet | null = await this.positionService.ShowOne(slug);
@@ -33,6 +39,8 @@ export class PositionController {
     @Put('update/:slug')
     @HttpCode(200)
     @UseGuards(AuthGuard, CompanyGuard)
+    @ApiResponse(docs.updatePositionOK)
+    @ApiResponse(docs.updatePositionBAD)
     async UpdatePosition(@Body() input: UpdatePositionInput, @Param('slug') slug: string, @Req() req): Promise<any> {
 
         const result: string = await this.positionService.UpdatePosition(input, req.user.id, req.user.isAdmin, slug);
@@ -43,9 +51,11 @@ export class PositionController {
     @Delete('delete/:slug')
     @HttpCode(200)
     @UseGuards(AuthGuard, CompanyGuard)
-    async DeleteCompany(@Param('id') position_id: string, @Req() req): Promise<any> {
+    @ApiResponse(docs.deletePositionOK)
+    @ApiResponse(docs.deletePositionNotFound)
+    async DeleteCompany(@Param('slug') position_slug: string, @Req() req): Promise<any> {
     
-        const result: string = await this.positionService.DeletePosition(position_id, req);
+        const result: string = await this.positionService.DeletePosition(position_slug, req);
     
         return { success: true, message: result };
     }
@@ -53,6 +63,7 @@ export class PositionController {
     @Post('mypositions')
     @HttpCode(200)
     @UseGuards(AuthGuard, CompanyGuard)
+    @ApiResponse(docs.showMyCompanyPositionsOK)
     async ShowMyCompanyPositions(@Req() req): Promise<any> {
 
         const positions: PositionGet[] | null = await this.positionService.ShowMyCompanyPositions(req);
@@ -62,6 +73,7 @@ export class PositionController {
 
     @Get('company/:slug')
     @HttpCode(200)
+    @ApiResponse(docs.allPositionsOfCompanyOK)
     async AllPositionsOfCompany(@Param('slug') company_slug: string): Promise<any> {
 
         const positions: PositionGet[] | null = await this.positionService.AllPositionsOfCompany(company_slug);
@@ -70,6 +82,7 @@ export class PositionController {
     }
     @Get('search')
     @HttpCode(200)
+    @ApiResponse(docs.searchPositionsOK)
     async SearchPositions(@Query('query') query: string): Promise<any> {
         const result: PositionGet[] | null | string = await this.positionService.SearchPositions(query);
 

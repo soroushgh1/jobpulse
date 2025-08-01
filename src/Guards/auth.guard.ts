@@ -19,7 +19,6 @@ export class AuthGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    try {
       const request: any = context.switchToHttp().getRequest();
 
       const secrets = {
@@ -38,9 +37,5 @@ export class AuthGuard implements CanActivate {
 
       request.user = payload;
       return true;
-
-    } catch (err: any) {
-      throw new HttpException(err.message, 400);
-    }
   }
 }
