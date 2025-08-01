@@ -83,3 +83,19 @@ export const attachTicketBAD = {
     message: 'ticket not found',
   },
 };
+
+export const messageOK = {
+  status: 200,
+  example: {
+    message: 'message sent',
+    success: true,
+  },
+};
+
+export const messageBAD = {
+  status: 404,
+  example: {
+    statusCode: 404,
+    message: 'replyed message not found',
+  },
+};

@@ -20,6 +20,7 @@ model User {
   requests  Request[]
   tickets   Ticket[] @relation("UserTickets")
   adminFor  Ticket[] @relation("AdminTickets")
+  messages Message[]
 }
 
 model Company {
@@ -72,15 +73,11 @@ model Ticket {
   description String
   slug String @unique
 
+  messages Message[]
   user       User @relation("UserTickets", fields: [userId], references: [id], onDelete: Cascade)
   adminUser  User? @relation("AdminTickets", fields: [adminUserId], references: [id], onDelete: Cascade)
   @@index([userId])
   @@index([adminUserId])
-}
-
-model Conversation {
-  id Int @id @default(autoincrement())
-  messages Message[]
 }
 
 model Message {
@@ -88,11 +85,14 @@ model Message {
   text String
   created_at String
 
-  replay_to_id Int?
-  replay_to Message? @relation("replayTo", fields: [replay_to_id], references: [id], onDelete: Cascade)
+  reply_to_id Int?
+  reply_to Message? @relation("replayTo", fields: [reply_to_id], references: [id], onDelete: Cascade)
 
-  conversation_id Int 
-  conversation Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  ticket_id Int 
+  ticket Ticket @relation(fields: [ticket_id], references: [id], onDelete: Cascade)
 
+  user_id Int
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
   replies Message[] @relation("replayTo")
 }

@@ -1,6 +1,6 @@
 import { HttpException, Inject, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
-import { PrismaClient, Ticket } from "@prisma/client";
-import { TicketMakeDto } from "./DTO/ticket.dto";
+import { Message, PrismaClient, Ticket } from "@prisma/client";
+import { MessageDTO, TicketMakeDto } from "./DTO/ticket.dto";
 import slugify from "slugify";
 
 @Injectable()
@@ -86,4 +86,54 @@ export class TicketRepo {
 
         return "ticket attached";
     }
+
+    async SendMessage(input: MessageDTO, ticket_slug: string, req): Promise<string> {
+
+        const findTicket: Ticket | null = await this.prismaClient.ticket.findUnique({ where: {
+            slug: ticket_slug
+        }});
+
+        if (!findTicket) throw new NotFoundException('ticket not found');
+
+        if (req.user.id != findTicket.adminUserId && req.user.id != findTicket.userId) {
+            throw new UnauthorizedException('you are not a part of this conversation');
+        };
+
+        let replyedMessage;
+
+        if (input.reply_to_id) {
+            replyedMessage = await this.prismaClient.message.findUnique({
+                where: {
+                    id: input.reply_to_id
+                }
+            })
+
+            if (!replyedMessage) throw new NotFoundException('replyed message not found');
+        }
+
+        await this.prismaClient.$transaction(async (tx) => {
+
+            const message = await this.prismaClient.message.create({
+                data: {
+                    ...input,
+                    ticket_id: findTicket.id,
+                    user_id: req.user.id,
+                    created_at: new Date().toString(),
+                }
+            })
+
+            await this.prismaClient.ticket.update({
+                where: {
+                    slug: ticket_slug
+                },
+                data: {
+                    messages: { connect: { id: message.id } }
+                }
+            });
+
+        });
+        
+        return "message sent"
+    }
+
 }

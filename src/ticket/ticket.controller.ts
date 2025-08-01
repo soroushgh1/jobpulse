@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { TicketService } from './ticket.service';
 import { AuthGuard } from 'src/Guards/auth.guard';
-import { TicketMakeDto } from './DTO/ticket.dto';
+import { MessageDTO, TicketMakeDto } from './DTO/ticket.dto';
 import { Ticket } from '@prisma/client';
 import { AdminGuard } from 'src/Guards/admin.guard';
 import * as docs from "src/docs/ticket.docs";
@@ -48,6 +48,21 @@ export class TicketController {
         @Req() req
     ): Promise<any> {
         const result: string = await this.ticketService.AdminAttach(req, ticket_slug);
+
+        return { message: result, success: true };
+    }
+
+    @ApiResponse(docs.messageOK)
+    @ApiResponse(docs.messageBAD)
+    @HttpCode(HttpStatus.OK)
+    @Post('message/:slug')
+    @UseGuards(AuthGuard)
+    async SendMessage(
+        @Body() input: MessageDTO,
+        @Param('slug') ticket_slug: string,
+        @Req() req
+    ): Promise<any> {
+        const result: string = await this.ticketService.SendMessage(input, ticket_slug, req);
 
         return { message: result, success: true };
     }

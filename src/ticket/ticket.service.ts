@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { TicketRepo } from './ticket.repository';
-import { TicketMakeDto } from './DTO/ticket.dto';
+import { MessageDTO, TicketMakeDto } from './DTO/ticket.dto';
 import { Ticket } from '@prisma/client';
 
 @Injectable()
@@ -35,4 +35,11 @@ export class TicketService {
 
         return result;
     }
+
+    async SendMessage(input: MessageDTO, ticket_slug: string, req): Promise<string> {
+        const result: string = await this.ticketRepo.SendMessage(input, ticket_slug, req);
+
+        return result;
+    }
+    
 }

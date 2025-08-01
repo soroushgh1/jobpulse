@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsString, Length } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, IsString, Length } from "class-validator";
 
 export class TicketMakeDto {
     
@@ -14,4 +14,18 @@ export class TicketMakeDto {
     @IsString()
     @Length(10, 500)
     description: string;
+}
+
+export class MessageDTO {
+
+    @ApiProperty()
+    @IsNotEmpty({ message: 'text can not be empty' })
+    @IsString()
+    @Length(10, 1000)
+    text: string;
+
+    @ApiProperty()
+    @IsOptional()
+    @IsNumber()
+    reply_to_id?: number;
 }
