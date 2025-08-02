@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { TicketRepo } from './ticket.repository';
-import { MessageDTO, TicketMakeDto } from './DTO/ticket.dto';
+import { MessageDTO, TicketMakeDto, TicketUpdateDto } from './DTO/ticket.dto';
 import { Ticket } from '@prisma/client';
 
 @Injectable()
@@ -46,5 +46,17 @@ export class TicketService {
         const tickets: Omit<Ticket, "userId" | "adminUserId">[] = await this.ticketRepo.MyTickets(req);
 
         return tickets;
+    }
+
+    async DeleteTicket(ticket_slug: string, req): Promise<string> {
+        const result: string = await this.DeleteTicket(ticket_slug, req);
+
+        return result;
+    }
+
+    async UpdateTicket(input: TicketUpdateDto, ticket_slug: string, req): Promise<string> {
+        const result: string = await this.ticketRepo.UpdateTicket(input, ticket_slug, req);
+
+        return result;
     }
 }

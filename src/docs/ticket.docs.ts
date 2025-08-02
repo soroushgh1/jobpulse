@@ -122,3 +122,35 @@ export const myTicketsOK = {
     success: true,
   },
 };
+
+export const deleteTicketOK = {
+  status: 200,
+  example: {
+    message: "ticket deleted",
+    success: true
+  }
+}
+
+export const deleteTicketBAD = {
+  status: 404,
+  example: {
+    statusCode: 404,
+    message: 'ticket not found',
+  },
+};
+
+export const updateTicketOK = {
+  status: 200,
+  example: {
+    message: "ticket updated",
+    success: true
+  }
+}
+
+export const updateTicketBAD = {
+  status: 404,
+  example: {
+    statusCode: 404,
+    message: 'ticket not found',
+  },
+};

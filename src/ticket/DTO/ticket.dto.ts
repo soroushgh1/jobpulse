@@ -16,6 +16,21 @@ export class TicketMakeDto {
     description: string;
 }
 
+export class TicketUpdateDto {
+    
+    @ApiProperty()
+    @IsOptional()
+    @IsString()
+    @Length(10, 100)
+    subject?: string;
+
+    @ApiProperty()
+    @IsOptional()
+    @IsString()
+    @Length(10, 500)
+    description?: string;
+}
+
 export class MessageDTO {
 
     @ApiProperty()

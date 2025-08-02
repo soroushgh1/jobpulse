@@ -1,6 +1,6 @@
-import { HttpException, Inject, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, HttpException, Inject, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { Message, PrismaClient, Ticket } from "@prisma/client";
-import { MessageDTO, TicketMakeDto } from "./DTO/ticket.dto";
+import { MessageDTO, TicketMakeDto, TicketUpdateDto } from "./DTO/ticket.dto";
 import slugify from "slugify";
 
 @Injectable()
@@ -155,6 +155,44 @@ export class TicketRepo {
         });
 
         return tickets;
+    }
+
+    async DeleteTicket(ticket_slug: string, req): Promise<string> {
+
+        const findTicket: Ticket | null = await this.prismaClient.ticket.findUnique({ where: {
+            slug: ticket_slug
+        }});
+
+        if (!findTicket) throw new NotFoundException('ticket not found');
+        if (req.user.id != findTicket.adminUserId && req.user.id != findTicket.userId) throw new UnauthorizedException('you are not part of this ticket');
+        
+        await this.prismaClient.ticket.delete({
+            where: {
+                slug: ticket_slug
+            }
+        });
+
+        return "ticket deleted";
+    }
+
+    async UpdateTicket(input: TicketUpdateDto, ticket_slug: string, req): Promise<string> {
+
+        const findTicket: Ticket | null = await this.prismaClient.ticket.findUnique({ where: {
+            slug: ticket_slug
+        }});
+
+        if (!findTicket) throw new NotFoundException('ticket not found');
+        if (req.user.id != findTicket.adminUserId && req.user.id != findTicket.userId) throw new UnauthorizedException('you are not part of this ticket');
+        if (findTicket.isAnswered == true) throw new BadRequestException('you can not change a ticket when it is already asnwered');
+
+        await this.prismaClient.ticket.update({
+            where: {
+                slug: ticket_slug
+            },
+            data: input
+        });
+
+        return "ticket update";
     }
 
 }

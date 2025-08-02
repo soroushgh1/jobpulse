@@ -1,7 +1,7 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { TicketService } from './ticket.service';
 import { AuthGuard } from 'src/Guards/auth.guard';
-import { MessageDTO, TicketMakeDto } from './DTO/ticket.dto';
+import { MessageDTO, TicketMakeDto, TicketUpdateDto } from './DTO/ticket.dto';
 import { Ticket } from '@prisma/client';
 import { AdminGuard } from 'src/Guards/admin.guard';
 import * as docs from "src/docs/ticket.docs";
@@ -77,6 +77,35 @@ export class TicketController {
         const tickets: Omit<Ticket, "userId" | "adminUserId">[] = await this.ticketService.MyTickets(req);
 
         return { tickets, success: true };
+    }
+
+    @ApiResponse(docs.deleteTicketOK)
+    @ApiResponse(docs.deleteTicketBAD)
+    @Post('delete/:slug')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(AuthGuard)
+    async DeleteTicket(
+        @Param('slug') ticket_slug: string,
+        @Req() req
+    ): Promise<any> {
+        const result: string = await this.ticketService.DeleteTicket(ticket_slug, req);
+
+        return { success: true, message: result };
+    }
+
+    @ApiResponse(docs.updateTicketOK)
+    @ApiResponse(docs.updateTicketBAD)
+    @Put('update/:slug')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(AuthGuard)
+    async UpdateTicket(
+        @Param('slug') ticket_slug: string,
+        @Body() input: TicketUpdateDto,
+        @Req() req
+    ): Promise<any> {
+        const result: string = await this.ticketService.UpdateTicket(input, ticket_slug, req);
+
+        return { success: true, message: result };
     }
 
     @ApiResponse(docs.userViewTicketOK)
