@@ -1,12 +1,14 @@
-import { BadRequestException, HttpException, Inject, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
-import { Message, PrismaClient, Ticket } from "@prisma/client";
+import { BadRequestException, HttpException, Inject, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { PrismaClient, Ticket } from "@prisma/client";
 import { MessageDTO, TicketMakeDto, TicketUpdateDto } from "./DTO/ticket.dto";
 import slugify from "slugify";
+import Redis from "ioredis";
 
 @Injectable()
 export class TicketRepo {
     constructor(
         @Inject("PRISMA_CLIENT") private readonly prismaClient: PrismaClient,
+        @Inject("REDIS_CLIENT") private readonly redisClient: Redis,
     ) {}
 
     async CreateTicket(input: TicketMakeDto, req): Promise<Record<string, string>> {
@@ -113,7 +115,7 @@ export class TicketRepo {
 
         await this.prismaClient.$transaction(async (tx) => {
 
-            const message = await this.prismaClient.message.create({
+            const message = await tx.message.create({
                 data: {
                     ...input,
                     ticket_id: findTicket.id,
@@ -122,7 +124,7 @@ export class TicketRepo {
                 }
             })
 
-            await this.prismaClient.ticket.update({
+            await tx.ticket.update({
                 where: {
                     slug: ticket_slug
                 },
@@ -130,6 +132,24 @@ export class TicketRepo {
                     messages: { connect: { id: message.id } }
                 }
             });
+
+            if (req.user.id == findTicket.adminUserId) {
+                const userNotifsJson: string | null = await this.redisClient.get(`user-${findTicket.userId}-note`);
+                if (!userNotifsJson) throw new InternalServerErrorException('there is a problem sending notification, be patient.');
+
+                const userNotes = JSON.parse(userNotifsJson);
+                userNotes.push(`new message from admin in the ticket: ${findTicket.subject}`);
+                await this.redisClient.set(`user-${findTicket.userId}-note`, JSON.stringify(userNotes));
+
+            } else {
+
+                const adminNotifsJson: string | null = await this.redisClient.get(`user-${findTicket.adminUserId}-note`);
+                if (!adminNotifsJson) throw new InternalServerErrorException('there is a problem sending notification, be patient.');
+
+                const adminNotes = JSON.parse(adminNotifsJson);
+                adminNotes.push(`new message from user in the ticket: ${findTicket.subject}`);
+                await this.redisClient.set(`user-${findTicket.adminUserId}-note`, JSON.stringify(adminNotes));
+            }
 
         });
         
