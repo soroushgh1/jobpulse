@@ -310,6 +310,7 @@ export class CompanyRepository {
 
     return "request answered";
   }
+  
   async SearchCompanies(query: string): Promise<CompanyGet[] | null | string> {
   
     const companies: CompanyGet[] | null =
@@ -337,4 +338,27 @@ export class CompanyRepository {
     return companies;
   }
   
+  async ShowMyCompany(req): Promise<CompanyGet> {
+
+    const myCompany: CompanyGet | null = await this.prismaService.company.findUnique({
+      where: {
+        ownerId: req.user.id
+      },
+      select: {
+          address: true,
+          email: true,
+          id: true,
+          slug: true,
+          description: true,
+          phone: true,
+          name: true,
+          pictures: true,
+      },
+    })
+
+    if (!myCompany) throw new NotFoundException('company not found for you');
+
+    return myCompany;
+  }
+
 }

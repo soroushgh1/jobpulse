@@ -102,7 +102,43 @@ export class JobSeekerRepo{
 
         const requests: any = await this.prismaService.request.findMany({
             where: {
-                positionId: findPosition?.id
+                positionId: findPosition?.id,
+                denyReason: "pending"
+            },
+            select: {
+                id: true,
+                resume: true,
+                isAccept: true,
+                denyReason: true,
+                position: {
+                    select: {
+                        id: true,
+                        name: true, 
+                        slug: true
+                    }
+                }
+            }
+        });
+
+        return requests;
+    }
+
+    async ShowAllAcceptedsForPosition(position_slug: string, req): Promise<any> {
+
+        const findPosition: Position | null = await this.positionRepo.FindOnSlug(position_slug);
+
+        const findCompany: Company | null = await this.prismaService.company.findUnique({
+            where: {
+                id: findPosition?.companyId
+            }
+        })
+
+        if (findCompany?.ownerId != req.user.id && req.user.isAdmin !== true) throw new UnauthorizedException('you are not the owner of the company for checking the requests');
+
+        const requests: any = await this.prismaService.request.findMany({
+            where: {
+                positionId: findPosition?.id,
+                isAccept: "accepted"
             },
             select: {
                 id: true,

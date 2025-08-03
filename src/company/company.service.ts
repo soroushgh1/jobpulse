@@ -93,4 +93,12 @@ export class CompanyService {
 
       return result;
   }
+
+  async ShowMyCompany(req): Promise<CompanyGet | null> {
+      
+      const myCompany: CompanyGet = await this.companyRepo.ShowMyCompany(req);
+
+      return myCompany;
+  }
+  
 }

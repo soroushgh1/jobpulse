@@ -35,6 +35,13 @@ export class JobSeekerService {
             return requests;
     }
 
+    async ShowAllAcceptedsForPosition(position_slug: string, req): Promise<any> {
+
+            const requests: any = await this.jobSeekerRepo.ShowAllAcceptedsForPosition(position_slug, req);
+
+            return requests;
+    }
+
     async ShowMyNotification(user_id: number): Promise<string[]> {
   
             const notifications: string[] = await this.jobSeekerRepo.ShowMyNotification(user_id);
