@@ -51,17 +51,6 @@ export class CompanyService {
 
   }
 
-  async ShowCompany(slug: string): Promise<CompanyGet | null> {
-      
-      const company: CompanyGet | null = await this.companyRepo.FindOnSlug(slug);
-
-      if (!company) {
-        throw new NotFoundException('company not found')
-      }
-
-      return company;
-  }
-
   async DeleteCompany(slug: string, req): Promise<string> {
 
     const result: string = await this.companyRepo.DeleteCompany(slug, req.user.id, req.user.isAdmin);

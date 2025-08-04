@@ -122,17 +122,12 @@ export class CompanyController {
     return { message: result, success: true };
   }
 
-  @ApiParam({
-    name: 'slug',
-    type: 'string',
-    description: 'Company slug needed for fetching information',
-  })
-  @ApiResponse(docs.showCompanyOK)
-  @ApiResponse(docs.showCompanyNOTFOUND)
-  @Get('getme/:slug')
+  @Post('getme')
   @HttpCode(200)
-  async ShowCompany(@Param('slug') company_slug: string): Promise<any> {
-    const company: CompanyGet | null = await this.companyService.ShowCompany(company_slug);
+  async ShowMyCompany(
+    @Req() req
+  ): Promise<any> {
+    const company: CompanyGet | null = await this.companyService.ShowMyCompany(req);
     return { company, success: true };
   }
 
@@ -205,6 +200,13 @@ export class CompanyController {
     return { result: result, success: true };
   }
 
+  @ApiParam({
+    name: 'slug',
+    type: 'string',
+    description: 'Company slug needed for fetching information',
+  })
+  @ApiResponse(docs.showCompanyOK)
+  @ApiResponse(docs.showCompanyNOTFOUND)
   @Get(':slug')
   async GetCompany(
     @Param('slug') slug: string
