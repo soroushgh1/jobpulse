@@ -122,6 +122,7 @@ export class CompanyController {
     return { message: result, success: true };
   }
 
+  @UseGuards(AuthGuard, CompanyGuard)
   @Post('getme')
   @HttpCode(200)
   async ShowMyCompany(
