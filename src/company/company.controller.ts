@@ -129,7 +129,7 @@ export class CompanyController {
   })
   @ApiResponse(docs.showCompanyOK)
   @ApiResponse(docs.showCompanyNOTFOUND)
-  @Get('get/:slug')
+  @Get('getme/:slug')
   @HttpCode(200)
   async ShowCompany(@Param('slug') company_slug: string): Promise<any> {
     const company: CompanyGet | null = await this.companyService.ShowCompany(company_slug);
@@ -204,4 +204,14 @@ export class CompanyController {
     const result: CompanyGet[] | null | string = await this.companyService.SearchCompanies(query);
     return { result: result, success: true };
   }
+
+  @Get(':slug')
+  async GetCompany(
+    @Param('slug') slug: string
+  ): Promise<any> {
+    const company: CompanyGet = await this.GetCompany(slug);
+
+    return { company, success: true };
+  }
+  
 }

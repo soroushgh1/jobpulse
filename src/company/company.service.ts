@@ -101,4 +101,12 @@ export class CompanyService {
       return myCompany;
   }
   
+  async GetCompany(slug: string): Promise<any> {
+      const company: CompanyGet | null = await this.companyRepo.FindOnSlug(slug);
+
+      if (!company) throw new NotFoundException('company not found');
+
+      return company;
+  }
+  
 }
