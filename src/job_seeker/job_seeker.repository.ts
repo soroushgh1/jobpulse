@@ -175,7 +175,8 @@ export class JobSeekerRepo{
                select: {
                username: true,
                email: true,
-               phone: true
+               phone: true,
+               role: true
                }
         });
     }
