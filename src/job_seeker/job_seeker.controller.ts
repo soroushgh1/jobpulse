@@ -59,7 +59,7 @@ export class JobSeekerController {
     DeleteFileInterceptor
   )
   @HttpCode(201)
-  async MakeRequest(
+  async makeRequest(
     @UploadedFile(
       new ParseFilePipeBuilder().build({
         fileIsRequired: true,
@@ -67,7 +67,7 @@ export class JobSeekerController {
       })
     )
     file: Express.Multer.File,
-    @Param('slug') position_slug: string,
+    @Param('slug') positionSlug: string,
     @Req() req
   ): Promise<any> {
     req.UploadedFiles = file;
@@ -75,7 +75,7 @@ export class JobSeekerController {
     if (req.fileValidationErr) {
       return { error: req.fileValidationErr, success: false };
     }
-    const result: string = await this.jobSeekerService.MakeRequest(file, position_slug, req);
+    const result: string = await this.jobSeekerService.makeRequest(file, positionSlug, req);
     return { message: result, success: true };
   }
 
@@ -89,8 +89,8 @@ export class JobSeekerController {
   @Delete(':slug/deleterequest')
   @UseGuards(AuthGuard, JobSeekerGuard)
   @HttpCode(200)
-  async DeleteRequest(@Param('slug') position_slug: string, @Req() req): Promise<any> {
-    const result: string = await this.jobSeekerService.DeleteRequest(position_slug, req);
+  async deleteRequest(@Param('slug') positionSlug: string, @Req() req): Promise<any> {
+    const result: string = await this.jobSeekerService.deleteRequest(positionSlug, req);
     return { message: result, success: true };
   }
 
@@ -98,8 +98,8 @@ export class JobSeekerController {
   @Post('myrequests')
   @UseGuards(AuthGuard, JobSeekerGuard)
   @HttpCode(200)
-  async ShowMyRequests(@Req() req): Promise<any> {
-    const requests: any = await this.jobSeekerService.ShowMyRequests(req);
+  async showMyRequests(@Req() req): Promise<any> {
+    const requests: any = await this.jobSeekerService.showMyRequests(req);
     return { requests, success: true };
   }
 
@@ -113,8 +113,8 @@ export class JobSeekerController {
   @Post(':slug/allrequests')
   @UseGuards(AuthGuard, CompanyGuard)
   @HttpCode(200)
-  async ShowAllRequestForPosition(@Param('slug') position_slug: string, @Req() req): Promise<any> {
-    const requests: any = await this.jobSeekerService.ShowAllRequestForPosition(position_slug, req);
+  async showAllRequestsForPosition(@Param('slug') positionSlug: string, @Req() req): Promise<any> {
+    const requests: any = await this.jobSeekerService.showAllRequestsForPosition(positionSlug, req);
     return { requests, success: true };
   }
 
@@ -123,16 +123,16 @@ export class JobSeekerController {
   @Post('mynotifications')
   @UseGuards(AuthGuard, JobSeekerGuard)
   @HttpCode(200)
-  async ShowMyNotification(@Req() req): Promise<any> {
-    const notifications: string[] = await this.jobSeekerService.ShowMyNotification(req.user.id);
+  async showMyNotifications(@Req() req): Promise<any> {
+    const notifications: string[] = await this.jobSeekerService.showMyNotifications(req.user.id);
     return { success: true, notifications: notifications };
   }
 
   @Post('getme')
   @UseGuards(AuthGuard)
   @HttpCode(200)
-  async GetMe(@Req() req): Promise<any> {
-    const user = await this.jobSeekerService.GetMe(req.user.id);
+  async getMe(@Req() req): Promise<any> {
+    const user = await this.jobSeekerService.getMe(req.user.id);
     return { success: true, user: user };
   }
 }

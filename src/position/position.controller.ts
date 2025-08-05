@@ -18,10 +18,8 @@ export class PositionController {
     @UseGuards(AuthGuard, CompanyGuard)
     @ApiResponse(docs.createPositionOK)
     @ApiResponse(docs.createPositionBAD)
-    async CreatePosition(@Body() input: CreatePositionInput, @Req() req): Promise<any> {
-        
-        const result: string = await this.positionService.CreatePosition(input, req)
-
+    async createPosition(@Body() input: CreatePositionInput, @Req() req): Promise<any> {
+        const result: string = await this.positionService.createPosition(input, req);
         return { message: result, success: true };
     }
 
@@ -29,11 +27,9 @@ export class PositionController {
     @HttpCode(200)
     @ApiResponse(docs.showOneOK)
     @ApiResponse(docs.showOneNotFound)
-    async ShowOne(@Param('slug') slug: string): Promise<any> {
-        
-        const position: PositionGet | null = await this.positionService.ShowOne(slug);
-
-        return { position: position, success: true };
+    async showOne(@Param('slug') slug: string): Promise<any> {
+        const position: PositionGet | null = await this.positionService.showOne(slug);
+        return { position, success: true };
     }
 
     @Put('update/:slug')
@@ -41,11 +37,9 @@ export class PositionController {
     @UseGuards(AuthGuard, CompanyGuard)
     @ApiResponse(docs.updatePositionOK)
     @ApiResponse(docs.updatePositionBAD)
-    async UpdatePosition(@Body() input: UpdatePositionInput, @Param('slug') slug: string, @Req() req): Promise<any> {
-
-        const result: string = await this.positionService.UpdatePosition(input, req.user.id, req.user.isAdmin, slug);
-
-        return { message: result, success: true }
+    async updatePosition(@Body() input: UpdatePositionInput, @Param('slug') slug: string, @Req() req): Promise<any> {
+        const result: string = await this.positionService.updatePosition(input, req.user.id, req.user.isAdmin, slug);
+        return { message: result, success: true };
     }
 
     @Delete('delete/:slug')
@@ -53,10 +47,8 @@ export class PositionController {
     @UseGuards(AuthGuard, CompanyGuard)
     @ApiResponse(docs.deletePositionOK)
     @ApiResponse(docs.deletePositionNotFound)
-    async DeleteCompany(@Param('slug') position_slug: string, @Req() req): Promise<any> {
-    
-        const result: string = await this.positionService.DeletePosition(position_slug, req);
-    
+    async deletePosition(@Param('slug') positionSlug: string, @Req() req): Promise<any> {
+        const result: string = await this.positionService.deletePosition(positionSlug, req);
         return { success: true, message: result };
     }
 
@@ -64,28 +56,24 @@ export class PositionController {
     @HttpCode(200)
     @UseGuards(AuthGuard, CompanyGuard)
     @ApiResponse(docs.showMyCompanyPositionsOK)
-    async ShowMyCompanyPositions(@Req() req): Promise<any> {
-
-        const positions: PositionGet[] | null = await this.positionService.ShowMyCompanyPositions(req);
-
+    async showMyCompanyPositions(@Req() req): Promise<any> {
+        const positions: PositionGet[] | null = await this.positionService.showMyCompanyPositions(req);
         return { positions, success: true };
     }
 
     @Get('company/:slug')
     @HttpCode(200)
     @ApiResponse(docs.allPositionsOfCompanyOK)
-    async AllPositionsOfCompany(@Param('slug') company_slug: string): Promise<any> {
-
-        const positions: PositionGet[] | null = await this.positionService.AllPositionsOfCompany(company_slug);
-
+    async allPositionsOfCompany(@Param('slug') companySlug: string): Promise<any> {
+        const positions: PositionGet[] | null = await this.positionService.allPositionsOfCompany(companySlug);
         return { positions, success: true };
     }
+
     @Get('search')
     @HttpCode(200)
     @ApiResponse(docs.searchPositionsOK)
-    async SearchPositions(@Query('query') query: string): Promise<any> {
-        const result: PositionGet[] | null | string = await this.positionService.SearchPositions(query);
-
-        return { result: result, success: true };
+    async searchPositions(@Query('query') query: string): Promise<any> {
+        const result: PositionGet[] | null | string = await this.positionService.searchPositions(query);
+        return { result, success: true };
     }
 }

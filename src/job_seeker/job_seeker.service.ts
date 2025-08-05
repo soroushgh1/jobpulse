@@ -4,53 +4,39 @@ import { Request } from '@prisma/client';
 
 @Injectable()
 export class JobSeekerService {
-    constructor(
-        private readonly jobSeekerRepo: JobSeekerRepo,
-    ){}
+  constructor(private readonly jobSeekerRepo: JobSeekerRepo) {}
 
-    async MakeRequest(resume_file: Express.Multer.File, position_slug: string, req): Promise<string> {
-            await this.jobSeekerRepo.MakeRequest(resume_file, position_slug, req);
+  async makeRequest(resumeFile: Express.Multer.File, positionSlug: string, req): Promise<string> {
+    await this.jobSeekerRepo.makeRequest(resumeFile, positionSlug, req);
+    return 'requested successful';
+  }
 
-            return "requested successfull";
-    }
+  async deleteRequest(positionSlug: string, req): Promise<string> {
+    const result: string = await this.jobSeekerRepo.deleteRequest(positionSlug, req);
+    return result;
+  }
 
-    async DeleteRequest(position_slug: string, req): Promise<string> {
+  async showMyRequests(req): Promise<any> {
+    const requests: any = await this.jobSeekerRepo.showMyRequests(req);
+    return requests;
+  }
 
-            const result: string = await this.jobSeekerRepo.DeleteRequest(position_slug, req);
+  async showAllRequestsForPosition(positionSlug: string, req): Promise<any> {
+    const requests: any = await this.jobSeekerRepo.showAllRequestsForPosition(positionSlug, req);
+    return requests;
+  }
 
-            return result;
-    }
+  async showAllAcceptedsForPosition(positionSlug: string, req): Promise<any> {
+    const requests: any = await this.jobSeekerRepo.showAllAcceptedsForPosition(positionSlug, req);
+    return requests;
+  }
 
-    async ShowMyRequests(req): Promise<any> {
+  async showMyNotifications(userId: number): Promise<string[]> {
+    const notifications: string[] = await this.jobSeekerRepo.showMyNotifications(userId);
+    return notifications;
+  }
 
-            const requests: any = await this.jobSeekerRepo.ShowMyRequests(req);
-
-            return requests;
-    }
-
-    async ShowAllRequestForPosition(position_slug: string, req): Promise<any> {
-
-            const requests: any = await this.jobSeekerRepo.ShowAllRequestForPosition(position_slug, req);
-
-            return requests;
-    }
-
-    async ShowAllAcceptedsForPosition(position_slug: string, req): Promise<any> {
-
-            const requests: any = await this.jobSeekerRepo.ShowAllAcceptedsForPosition(position_slug, req);
-
-            return requests;
-    }
-
-    async ShowMyNotification(user_id: number): Promise<string[]> {
-  
-            const notifications: string[] = await this.jobSeekerRepo.ShowMyNotification(user_id);
-
-            return notifications;
-    }
-
-    async GetMe(userId: number): Promise<any> {
-            return await this.jobSeekerRepo.GetMe(userId);
-    }
-    
+  async getMe(userId: number): Promise<any> {
+    return await this.jobSeekerRepo.getMe(userId);
+  }
 }

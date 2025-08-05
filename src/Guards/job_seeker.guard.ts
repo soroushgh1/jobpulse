@@ -15,7 +15,7 @@ export class JobSeekerGuard implements CanActivate {
 
             const userId = request.user.id;
     
-            const user: User | null = await this.userRepo.FindOnId(userId);
+            const user: User | null = await this.userRepo.findOnId(userId);
     
             if(!user) throw new HttpException('there was a problem in authorization', 400);
     

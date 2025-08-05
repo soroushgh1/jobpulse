@@ -1,183 +1,192 @@
-import { BadRequestException, HttpException, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
-import { PositionRepo } from "src/position/position.repository";
-import { Company, Position, PrismaClient, Request } from "@prisma/client";
-import Redis from "ioredis";
+import {
+  BadRequestException,
+  HttpException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { PositionRepo } from 'src/position/position.repository';
+import { Company, Position, PrismaClient, Request } from '@prisma/client';
+import Redis from 'ioredis';
 import * as path from 'path';
-import { promises as fs } from 'fs'
+import { promises as fs } from 'fs';
 
 @Injectable()
-export class JobSeekerRepo{
-    constructor(
-        private readonly positionRepo: PositionRepo,
-        @Inject("PRISMA_CLIENT") private readonly prismaService: PrismaClient,
-        @Inject("REDIS_CLIENT") private readonly redisClient: Redis,
-    ){}
+export class JobSeekerRepo {
+  constructor(
+    private readonly positionRepo: PositionRepo,
+    @Inject('PRISMA_CLIENT') private readonly prismaService: PrismaClient,
+    @Inject('REDIS_CLIENT') private readonly redisClient: Redis,
+  ) {}
 
-    async MakeRequest(resume_file: Express.Multer.File, position_slug: string, req): Promise<Request | null> {
+  async makeRequest(
+    resumeFile: Express.Multer.File,
+    positionSlug: string,
+    req,
+  ): Promise<Request | null> {
+    const findPosition: Position | null = await this.positionRepo.findBySlug(positionSlug);
 
-        const findPosition: Position | null = await this.positionRepo.FindOnSlug(position_slug);
+    const isRequestExist: Request | null = await this.prismaService.request.findFirst({
+      where: {
+        positionId: findPosition?.id,
+        userId: req.user.id,
+      },
+    });
 
-        const isRequestExist: Request | null = await this.prismaService.request.findFirst({
-            where: {
-                positionId: findPosition?.id,
-                userId: req.user.id
-            }
-        })
+    if (isRequestExist) throw new HttpException('you already sent a request for this position', 400);
 
-        if (isRequestExist) throw new HttpException('you already sent a request for this position', 400);
+    const makeRequest: Request | null = await this.prismaService.request.create({
+      data: {
+        resume: 'http://localhost:3000/' + resumeFile.path,
+        userId: req.user.id,
+        positionId: findPosition?.id as number,
+      },
+    });
 
-        const makeRequest: Request | null = await this.prismaService.request.create({ 
-            data: {
-                resume: "http://localhost:3000/"+resume_file.path,
-                userId: req.user.id,
-                positionId: (findPosition?.id as number),
-            }
-        })
+    if (!makeRequest) throw new HttpException('there is a problem in requesting for position', 500);
 
-        if (!makeRequest) throw new HttpException('there is a problem in requesting for position', 500);
+    return makeRequest;
+  }
 
-        return makeRequest;
-    }
- 
-    async DeleteRequest(position_slug: string, req): Promise<string> {
+  async deleteRequest(positionSlug: string, req): Promise<string> {
+    const findPosition: Position | null = await this.positionRepo.findBySlug(positionSlug);
 
-        const findPosition: Position | null = await this.positionRepo.FindOnSlug(position_slug);
+    const isRequestExist: Request | null = await this.prismaService.request.findFirst({
+      where: {
+        positionId: findPosition?.id,
+        userId: req.user.id,
+      },
+    });
 
-        const isRequestExist: Request | null = await this.prismaService.request.findFirst({
-            where: {
-                positionId: findPosition?.id,
-                userId: req.user.id
-            }
-        })
+    if (!isRequestExist) throw new HttpException('you did not sent a request to this position', 400);
 
-        if (!isRequestExist) throw new HttpException('you did not sent a request to this position', 400);
+    const noPrefixFile: string[] = isRequestExist.resume.split('http://localhost:3000/');
+    const filePath = path.resolve(__dirname, '..', '..', noPrefixFile[1]);
+    await fs.unlink(filePath);
 
-        let noPrefixFile: string[] = isRequestExist.resume.split("http://localhost:3000/");
-        const filePath = path.resolve(__dirname, '..', "..", noPrefixFile[1]);
-        await fs.unlink(filePath);
-        await this.prismaService.request.delete({ 
-            where: {
-                id: isRequestExist.id
-            }
-        })
+    await this.prismaService.request.delete({
+      where: {
+        id: isRequestExist.id,
+      },
+    });
 
-        return "request deleted successfully";
-    }
-    
-    async ShowMyRequests(req): Promise<any> {
+    return 'request deleted successfully';
+  }
 
-        const requests: any = await this.prismaService.request.findMany({
-            where: {
-                userId: req.user.id
-            },
-            select: {
-                id: true,
-                resume: true,
-                isAccept: true,
-                denyReason: true,
-                position: {
-                    select: {
-                        id: true,
-                        name: true, 
-                        slug: true
-                    }
-                }
-            }
-        });
+  async showMyRequests(req): Promise<any> {
+    const requests: any = await this.prismaService.request.findMany({
+      where: {
+        userId: req.user.id,
+      },
+      select: {
+        id: true,
+        resume: true,
+        isAccept: true,
+        denyReason: true,
+        position: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+      },
+    });
 
-        return requests;
-    }
+    return requests;
+  }
 
-    async ShowAllRequestForPosition(position_slug: string, req): Promise<any> {
+  async showAllRequestsForPosition(positionSlug: string, req): Promise<any> {
+    const findPosition: Position | null = await this.positionRepo.findBySlug(positionSlug);
 
-        const findPosition: Position | null = await this.positionRepo.FindOnSlug(position_slug);
+    const findCompany: Company | null = await this.prismaService.company.findUnique({
+      where: {
+        id: findPosition?.companyId,
+      },
+    });
 
-        const findCompany: Company | null = await this.prismaService.company.findUnique({
-            where: {
-                id: findPosition?.companyId
-            }
-        })
-
-        if (findCompany?.ownerId != req.user.id && req.user.isAdmin !== true) throw new UnauthorizedException('you are not the owner of the company for checking the requests');
-
-        const requests: any = await this.prismaService.request.findMany({
-            where: {
-                positionId: findPosition?.id,
-                denyReason: "pending"
-            },
-            select: {
-                id: true,
-                resume: true,
-                isAccept: true,
-                denyReason: true,
-                position: {
-                    select: {
-                        id: true,
-                        name: true, 
-                        slug: true
-                    }
-                }
-            }
-        });
-
-        return requests;
+    if (findCompany?.ownerId !== req.user.id && req.user.isAdmin !== true) {
+      throw new UnauthorizedException('you are not the owner of the company for checking the requests');
     }
 
-    async ShowAllAcceptedsForPosition(position_slug: string, req): Promise<any> {
+    const requests: any = await this.prismaService.request.findMany({
+      where: {
+        positionId: findPosition?.id,
+        denyReason: 'pending',
+      },
+      select: {
+        id: true,
+        resume: true,
+        isAccept: true,
+        denyReason: true,
+        position: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+      },
+    });
 
-        const findPosition: Position | null = await this.positionRepo.FindOnSlug(position_slug);
+    return requests;
+  }
 
-        const findCompany: Company | null = await this.prismaService.company.findUnique({
-            where: {
-                id: findPosition?.companyId
-            }
-        })
+  async showAllAcceptedsForPosition(positionSlug: string, req): Promise<any> {
+    const findPosition: Position | null = await this.positionRepo.findBySlug(positionSlug);
 
-        if (findCompany?.ownerId != req.user.id && req.user.isAdmin !== true) throw new UnauthorizedException('you are not the owner of the company for checking the requests');
+    const findCompany: Company | null = await this.prismaService.company.findUnique({
+      where: {
+        id: findPosition?.companyId,
+      },
+    });
 
-        const requests: any = await this.prismaService.request.findMany({
-            where: {
-                positionId: findPosition?.id,
-                isAccept: "accepted"
-            },
-            select: {
-                id: true,
-                resume: true,
-                isAccept: true,
-                denyReason: true,
-                position: {
-                    select: {
-                        id: true,
-                        name: true, 
-                        slug: true
-                    }
-                }
-            }
-        });
-
-        return requests;
+    if (findCompany?.ownerId !== req.user.id && req.user.isAdmin !== true) {
+      throw new UnauthorizedException('you are not the owner of the company for checking the requests');
     }
 
-    async ShowMyNotification(user_id: number): Promise<string[]> {
+    const requests: any = await this.prismaService.request.findMany({
+      where: {
+        positionId: findPosition?.id,
+        isAccept: 'accepted',
+      },
+      select: {
+        id: true,
+        resume: true,
+        isAccept: true,
+        denyReason: true,
+        position: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+      },
+    });
 
-        const notificationJson: string | null = await this.redisClient.get(`user-${user_id}-note`);
+    return requests;
+  }
 
-        if (!notificationJson) throw new HttpException('trouble in getting notification', 400);
-        
-        const notifications: string[] = await JSON.parse(notificationJson);
+  async showMyNotifications(userId: number): Promise<string[]> {
+    const notificationJson: string | null = await this.redisClient.get(`user-${userId}-note`);
 
-        return notifications;
-    } 
+    if (!notificationJson) throw new HttpException('trouble in getting notification', 400);
 
-    async GetMe(userId: number) {
-        return await this.prismaService.user.findUnique({
-               where: { id: userId },
-               select: {
-               username: true,
-               email: true,
-               phone: true,
-               role: true
-               }
-        });
-    }
+    const notifications: string[] = JSON.parse(notificationJson);
+
+    return notifications;
+  }
+
+  async getMe(userId: number) {
+    return await this.prismaService.user.findUnique({
+      where: { id: userId },
+      select: {
+        username: true,
+        email: true,
+        phone: true,
+        role: true,
+      },
+    });
+  }
 }

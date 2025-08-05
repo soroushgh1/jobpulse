@@ -13,19 +13,19 @@ export class AuthController {
   @ApiResponse(docs.registerBAD)
   @Post('register')
   @HttpCode(201)
-  async Register(@Body() userinput: UserRegisterInput): Promise<any> {
-    const result: string = await this.authservice.Register(userinput);
+  async register(@Body() userinput: UserRegisterInput): Promise<any> {
+    const result: string = await this.authservice.register(userinput);
     return { message: result, success: true };
   }
 
   @ApiResponse(docs.loginOK)
   @ApiResponse(docs.loginBAD)
   @Post('login')
-  async Login(
+  async login(
     @Body() userinput: UserLoginInput,
     @Res() res: Response,
   ): Promise<any> {
-    const result: string = await this.authservice.Login(userinput, res);
+    const result: string = await this.authservice.login(userinput, res);
     res.status(200).json({ message: result, success: true });
   }
 
@@ -33,8 +33,8 @@ export class AuthController {
   @ApiResponse(docs.refreshBAD)
   @HttpCode(200)
   @Post('refresh')
-  async RefreshJWT(@Req() req, @Res() res): Promise<any> {
-    const result: string = await this.authservice.GetRefreshJWT(req, res);
+  async refreshJWT(@Req() req, @Res() res): Promise<any> {
+    const result: string = await this.authservice.getRefreshJWT(req, res);
 
     res.status(200).json({ message: result, success: true });
   }
@@ -43,13 +43,13 @@ export class AuthController {
   @ApiResponse(docs.authStatusBAD)
   @HttpCode(200)
   @Post('status')
-  async AuthStatus(@Req() req): Promise<any> {
-    return this.authservice.GetAuthStatus(req);
+  async authStatus(@Req() req): Promise<any> {
+    return this.authservice.getAuthStatus(req);
   }
 
   @HttpCode(200)
   @Post('logout')
-  LogOut(
+  logOut(
     @Res() res: Response
   ): any {
     res.clearCookie("accessToken");
@@ -62,7 +62,7 @@ export class AuthController {
   @ApiResponse(docs.adminRegisterBAD)
   @Post('masterkeyup')
   @HttpCode(201)
-  async RegisterAdmin(@Body() admininput: AdminRegisterInput): Promise<any> {
+  async registerAdmin(@Body() admininput: AdminRegisterInput): Promise<any> {
     const result: string = await this.authservice.RegisterAdmin(admininput);
     return { message: result, success: true };
   }
@@ -70,11 +70,11 @@ export class AuthController {
   @ApiResponse(docs.adminLoginOK)
   @ApiResponse(docs.adminLoginBAD)
   @Post('masterkeyin')
-  async LoginAdmin(
+  async loginAdmin(
     @Body() admininput: AdminLoginInput,
     @Res() res: Response,
   ): Promise<any> {
-    const result: string = await this.authservice.LoginAdmin(admininput, res);
+    const result: string = await this.authservice.loginAdmin(admininput, res);
     res.status(200).json({ message: result, success: true });
   }
 }

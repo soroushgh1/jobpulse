@@ -20,25 +20,25 @@ export class AuthService {
     private readonly dotenv: ConfigService,
   ) {}
 
-  async Register(userinput: UserRegisterInput): Promise<string> {
-      const isEmailExist: User | null = await this.authrepo.FindOnEmail(
+  async register(userinput: UserRegisterInput): Promise<string> {
+      const isEmailExist: User | null = await this.authrepo.findOnEmail(
         userinput.email,
       );
-      const isPhoneExist: User | null = await this.authrepo.FindOnPhone(
+      const isPhoneExist: User | null = await this.authrepo.findOnPhone(
         userinput.phone,
       );
 
       if (isEmailExist || isPhoneExist)
         throw new HttpException('email or phone is used', 400);
 
-      this.authrepo.CreateUser(userinput);
+      this.authrepo.createUser(userinput);
 
       return 'user created successfully';
   }
 
-  async Login(userinput: UserLoginInput, res: Response): Promise<string> {
+  async login(userinput: UserLoginInput, res: Response): Promise<string> {
 
-      const isExist: User | null = await this.authrepo.FindOnEmail(
+      const isExist: User | null = await this.authrepo.findOnEmail(
         userinput.email,
       );
 
@@ -83,7 +83,7 @@ export class AuthService {
       return 'Login was successful';
   }
 
-  async GetRefreshJWT(req: any, res: any): Promise<string> {
+  async getRefreshJWT(req: any, res: any): Promise<string> {
 
       const refreshToken: string = req.cookies['refreshToken'];
       if (!refreshToken)
@@ -114,7 +114,7 @@ export class AuthService {
     
   }
 
-  async GetAuthStatus(req: any): Promise<any> {
+  async getAuthStatus(req: any): Promise<any> {
     
       const statusObject: any = { access_token: false, refresh_token: false };
 
@@ -129,10 +129,10 @@ export class AuthService {
 
   async RegisterAdmin(userinput: AdminRegisterInput): Promise<string> {
       
-      const isEmailExist: User | null = await this.authrepo.FindOnEmail(
+      const isEmailExist: User | null = await this.authrepo.findOnEmail(
         userinput.email,
       );
-      const isPhoneExist: User | null = await this.authrepo.FindOnPhone(
+      const isPhoneExist: User | null = await this.authrepo.findOnPhone(
         userinput.phone,
       );
 
@@ -142,14 +142,14 @@ export class AuthService {
       if (userinput.adminsecret != process.env.ADMIN_SECRET) 
         throw new HttpException('admin secret wrong', 400);
 
-      this.authrepo.CreateUser(userinput);
+      this.authrepo.createUser(userinput);
 
       return "admin created successfully."
   }
 
-  async LoginAdmin(input: AdminLoginInput, res: Response): Promise<string> {
+  async loginAdmin(input: AdminLoginInput, res: Response): Promise<string> {
 
-      const isEmailExist: User | null = await this.authrepo.FindOnEmail(
+      const isEmailExist: User | null = await this.authrepo.findOnEmail(
         input.email,
       );
 

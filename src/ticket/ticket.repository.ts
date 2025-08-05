@@ -11,20 +11,20 @@ export class TicketRepo {
         @Inject("REDIS_CLIENT") private readonly redisClient: Redis,
     ) {}
 
-    async CreateTicket(input: TicketMakeDto, req): Promise<Record<string, string>> {
+    async createTicket(input: TicketMakeDto, req): Promise<Record<string, string>> {
         
         const baseSlug: string = slugify(input.subject, { lower: true });
         let slug: string = baseSlug;
         let counter: number = 0;
 
-        while (await this.prismaClient.ticket.findUnique({ where: { slug: slug } })) {
+        while (await this.prismaClient.ticket.findUnique({ where: { slug } })) {
             slug = `${baseSlug}-${counter}`;
-            counter++
+            counter++;
         }
 
         const ticket: Ticket | null = await this.prismaClient.ticket.create({
             data: {
-                slug: slug,
+                slug,
                 subject: input.subject,
                 description: input.description,
                 isAnswered: false,
@@ -37,21 +37,19 @@ export class TicketRepo {
         return { message: "your ticket created successfully.", slug: ticket.slug };
     }
 
-    async UserViewTicket(slug: string, req): Promise<Omit<Ticket, "userId" | "adminUserId">> {
+    async userViewTicket(slug: string, req): Promise<Omit<Ticket, "userId" | "adminUserId">> {
 
-        const ticket: Ticket | null = await this.prismaClient.ticket.findUnique({
-            where: { slug: slug },
-        });
+        const ticket: Ticket | null = await this.prismaClient.ticket.findUnique({ where: { slug } });
 
         if (!ticket) throw new NotFoundException('ticket not found');
-        if (ticket.userId != req.user.id && req.user.isAdmin == false) throw new UnauthorizedException('you can not access other people tickets');
+        if (ticket.userId !== req.user.id && req.user.isAdmin === false) throw new UnauthorizedException('you can not access other people tickets');
 
         const { userId, adminUserId, ...safeTicket } = ticket;
         
         return safeTicket;
     }
 
-    async AdminViewTickets(): Promise<Omit<Ticket, "userId" | "adminUserId">[]> {
+    async adminViewTickets(): Promise<Omit<Ticket, "userId" | "adminUserId">[]> {
 
         const tickets: Omit<Ticket, "userId" | "adminUserId">[] | null = await this.prismaClient.ticket.findMany({
             select: {
@@ -68,18 +66,14 @@ export class TicketRepo {
         return tickets;
     }
 
-    async AdminAttach(req, ticket_slug: string): Promise<string> {
+    async adminAttach(req, ticketSlug: string): Promise<string> {
 
-        const findTicket: Ticket | null = await this.prismaClient.ticket.findUnique({ where: {
-            slug: ticket_slug
-        }});
+        const findTicket: Ticket | null = await this.prismaClient.ticket.findUnique({ where: { slug: ticketSlug } });
 
         if (!findTicket) throw new NotFoundException('ticket not found');
 
         await this.prismaClient.ticket.update({
-            where: {
-                slug: ticket_slug
-            },
+            where: { slug: ticketSlug },
             data: {
                 isAnswered: true,
                 adminUserId: req.user.id
@@ -89,28 +83,24 @@ export class TicketRepo {
         return "ticket attached";
     }
 
-    async SendMessage(input: MessageDTO, ticket_slug: string, req): Promise<string> {
+    async sendMessage(input: MessageDTO, ticketSlug: string, req): Promise<string> {
 
-        const findTicket: Ticket | null = await this.prismaClient.ticket.findUnique({ where: {
-            slug: ticket_slug
-        }});
+        const findTicket: Ticket | null = await this.prismaClient.ticket.findUnique({ where: { slug: ticketSlug } });
 
         if (!findTicket) throw new NotFoundException('ticket not found');
 
-        if (req.user.id != findTicket.adminUserId && req.user.id != findTicket.userId) {
+        if (req.user.id !== findTicket.adminUserId && req.user.id !== findTicket.userId) {
             throw new UnauthorizedException('you are not a part of this conversation');
-        };
+        }
 
-        let replyedMessage;
+        let repliedMessage;
 
         if (input.reply_to_id) {
-            replyedMessage = await this.prismaClient.message.findUnique({
-                where: {
-                    id: input.reply_to_id
-                }
-            })
+            repliedMessage = await this.prismaClient.message.findUnique({
+                where: { id: input.reply_to_id }
+            });
 
-            if (!replyedMessage) throw new NotFoundException('replyed message not found');
+            if (!repliedMessage) throw new NotFoundException('replied message not found');
         }
 
         await this.prismaClient.$transaction(async (tx) => {
@@ -120,20 +110,18 @@ export class TicketRepo {
                     ...input,
                     ticket_id: findTicket.id,
                     user_id: req.user.id,
-                    created_at: new Date().toString(),
+                    created_at: new Date().toISOString(),
                 }
-            })
+            });
 
             await tx.ticket.update({
-                where: {
-                    slug: ticket_slug
-                },
+                where: { slug: ticketSlug },
                 data: {
                     messages: { connect: { id: message.id } }
                 }
             });
 
-            if (req.user.id == findTicket.adminUserId) {
+            if (req.user.id === findTicket.adminUserId) {
                 const userNotifsJson: string | null = await this.redisClient.get(`user-${findTicket.userId}-note`);
                 if (!userNotifsJson) throw new InternalServerErrorException('there is a problem sending notification, be patient.');
 
@@ -142,7 +130,6 @@ export class TicketRepo {
                 await this.redisClient.set(`user-${findTicket.userId}-note`, JSON.stringify(userNotes));
 
             } else {
-
                 const adminNotifsJson: string | null = await this.redisClient.get(`user-${findTicket.adminUserId}-note`);
                 if (!adminNotifsJson) throw new InternalServerErrorException('there is a problem sending notification, be patient.');
 
@@ -153,10 +140,10 @@ export class TicketRepo {
 
         });
         
-        return "message sent"
+        return "message sent";
     }
 
-    async MyTickets(req): Promise<Omit<Ticket, "userId" | "adminUserId">[] > {
+    async myTickets(req): Promise<Omit<Ticket, "userId" | "adminUserId">[]> {
 
         const tickets: Omit<Ticket, "userId" | "adminUserId">[] | null = await this.prismaClient.ticket.findMany({
             where: {
@@ -177,42 +164,32 @@ export class TicketRepo {
         return tickets;
     }
 
-    async DeleteTicket(ticket_slug: string, req): Promise<string> {
+    async deleteTicket(ticketSlug: string, req): Promise<string> {
 
-        const findTicket: Ticket | null = await this.prismaClient.ticket.findUnique({ where: {
-            slug: ticket_slug
-        }});
+        const findTicket: Ticket | null = await this.prismaClient.ticket.findUnique({ where: { slug: ticketSlug } });
 
         if (!findTicket) throw new NotFoundException('ticket not found');
-        if (req.user.id != findTicket.adminUserId && req.user.id != findTicket.userId) throw new UnauthorizedException('you are not part of this ticket');
+        if (req.user.id !== findTicket.adminUserId && req.user.id !== findTicket.userId) throw new UnauthorizedException('you are not part of this ticket');
         
-        await this.prismaClient.ticket.delete({
-            where: {
-                slug: ticket_slug
-            }
-        });
+        await this.prismaClient.ticket.delete({ where: { slug: ticketSlug } });
 
         return "ticket deleted";
     }
 
-    async UpdateTicket(input: TicketUpdateDto, ticket_slug: string, req): Promise<string> {
+    async updateTicket(input: TicketUpdateDto, ticketSlug: string, req): Promise<string> {
 
-        const findTicket: Ticket | null = await this.prismaClient.ticket.findUnique({ where: {
-            slug: ticket_slug
-        }});
+        const findTicket: Ticket | null = await this.prismaClient.ticket.findUnique({ where: { slug: ticketSlug } });
 
         if (!findTicket) throw new NotFoundException('ticket not found');
-        if (req.user.id != findTicket.adminUserId && req.user.id != findTicket.userId) throw new UnauthorizedException('you are not part of this ticket');
-        if (findTicket.isAnswered == true) throw new BadRequestException('you can not change a ticket when it is already asnwered');
+        if (req.user.id !== findTicket.adminUserId && req.user.id !== findTicket.userId) throw new UnauthorizedException('you are not part of this ticket');
+        if (findTicket.isAnswered === true) throw new BadRequestException('you can not change a ticket when it is already answered');
 
         await this.prismaClient.ticket.update({
-            where: {
-                slug: ticket_slug
-            },
+            where: { slug: ticketSlug },
             data: input
         });
 
-        return "ticket update";
+        return "ticket updated";
     }
 
 }

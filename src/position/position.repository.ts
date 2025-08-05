@@ -6,193 +6,204 @@ import { PositionGet } from "src/types/types";
 import { CreatePositionInput, UpdatePositionInput } from "./DTO/position.dto";
 
 @Injectable()
-export class PositionRepo{
+export class PositionRepo {
     constructor(
         @Inject("PRISMA_CLIENT") private readonly prismaService: PrismaClient,
     ) {}
 
-    async FindOnSlug(slug: string): Promise<Position | null> {
+    async findBySlug(slug: string): Promise<Position | null> {
 
-        const position: Position | null = await this.prismaService.position.findUnique({ where: { slug: slug }, 
-        select: {
-            id: true,
-            name: true,
-            degree: true,
-            description: true,
-            salary: true,
-            slug: true,
-            companyId: true,
-            company: { select: { 
-                address: true,
-                email: true,
-                id: true, 
-                slug: true, 
-                description: true, 
-                phone: true,
+        const position: Position | null = await this.prismaService.position.findUnique({
+            where: { slug },
+            select: {
+                id: true,
                 name: true,
-                pictures: true,
-                ownerId: true
-            }}
-        }});
+                degree: true,
+                description: true,
+                salary: true,
+                slug: true,
+                companyId: true,
+                company: {
+                    select: {
+                        address: true,
+                        email: true,
+                        id: true,
+                        slug: true,
+                        description: true,
+                        phone: true,
+                        name: true,
+                        pictures: true,
+                        ownerId: true
+                    }
+                }
+            }
+        });
         if (!position) throw new NotFoundException('position not found');
 
         return position;
-
     }
 
-    async CreatePosition(input: CreatePositionInput, user_id: number): Promise<Position | null> {
+    async createPosition(input: CreatePositionInput, userId: number): Promise<Position | null> {
 
         const baseSlug: string = slugify(input.name, { lower: true });
 
         let slug: string = baseSlug;
         let counter: number = 1;
-      
-        while (await this.prismaService.position.findUnique({ where: { slug: slug } })) {
+
+        while (await this.prismaService.position.findUnique({ where: { slug } })) {
             slug = `${baseSlug}-${counter}`;
             counter++;
         }
 
         const company: Company | null = await this.prismaService.company.findUnique({
-            where: { ownerId: user_id }
+            where: { ownerId: userId }
         });
 
         if (!company) throw new NotFoundException('company not found');
 
         const position: Position | null = await this.prismaService.position.create({
-            data:{
+            data: {
                 name: input.name,
                 description: input.description,
                 degree: input.degree,
                 salary: input.salary,
-                slug: slug,
+                slug,
                 companyId: company.id
             }
-        })
+        });
 
         return position;
     }
 
-    async ShowOne(slug: string): Promise<PositionGet | null> {
+    async showOne(slug: string): Promise<PositionGet | null> {
 
-        const position: PositionGet | null = await this.prismaService.position.findUnique({ where: {slug: slug}, select: {
-            id: true,
-            name: true,
-            degree: true,
-            description: true,
-            salary: true,
-            slug: true,
-            company: { select: { 
-                address: true,
-                email: true,
-                id: true, 
-                slug: true, 
-                description: true, 
-                phone: true,
+        const position: PositionGet | null = await this.prismaService.position.findUnique({
+            where: { slug },
+            select: {
+                id: true,
                 name: true,
-                pictures: true,
-            }}
-
-        } })
+                degree: true,
+                description: true,
+                salary: true,
+                slug: true,
+                company: {
+                    select: {
+                        address: true,
+                        email: true,
+                        id: true,
+                        slug: true,
+                        description: true,
+                        phone: true,
+                        name: true,
+                        pictures: true,
+                    }
+                }
+            }
+        });
 
         if (!position) throw new NotFoundException('position not found');
 
         return position;
     }
 
-    async UpdatePosition(input: UpdatePositionInput, position_slug: string, user_id: number, isAdmin: boolean): Promise<PositionGet | null> {
+    async updatePosition(input: UpdatePositionInput, positionSlug: string, userId: number, isAdmin: boolean): Promise<PositionGet | null> {
 
-        const position: Position | null = await this.FindOnSlug(position_slug);
+        const position: Position | null = await this.findBySlug(positionSlug);
         if (!position) throw new NotFoundException('position not found for update');
 
-        const company: Company | null = await this.prismaService.company.findUnique({ where: { id: position.id } });
+        const company: Company | null = await this.prismaService.company.findUnique({ where: { id: position.companyId } });
         if (!company) throw new NotFoundException('company for position not found to update');
 
-        if (company.ownerId != user_id && isAdmin !== true) throw new HttpException('you are not the owner of this position to update it', 400);
+        if (company.ownerId !== userId && isAdmin !== true) throw new HttpException('you are not the owner of this position to update it', 400);
 
-        if (input.name && position.name != input.name) {
+        if (input.name && position.name !== input.name) {
 
-            const baseSlug: string = await slugify(input.name, { lower: true });
+            const baseSlug: string = slugify(input.name, { lower: true });
 
             let slug: string = baseSlug;
             let counter: number = 1;
-          
-            while (await this.prismaService.position.findUnique({ where: { slug: slug } })) {
+
+            while (await this.prismaService.position.findUnique({ where: { slug } })) {
                 slug = `${baseSlug}-${counter}`;
                 counter++;
             }
 
-            (input as any).slug = slug
+            (input as any).slug = slug;
         }
 
         const updatedPosition: PositionGet | null = await this.prismaService.position.update({
             where: {
-                slug: position_slug
+                slug: positionSlug
             },
             data: input,
             select: {
-            id: true,
-            name: true,
-            degree: true,
-            description: true,
-            salary: true,
-            slug: true,
-            company: { select: { 
-                address: true,
-                email: true,
-                id: true, 
-                slug: true, 
-                description: true, 
-                phone: true,
+                id: true,
                 name: true,
-                pictures: true,
-            }}
+                degree: true,
+                description: true,
+                salary: true,
+                slug: true,
+                company: {
+                    select: {
+                        address: true,
+                        email: true,
+                        id: true,
+                        slug: true,
+                        description: true,
+                        phone: true,
+                        name: true,
+                        pictures: true,
+                    }
+                }
             }
         });
 
         return updatedPosition;
     }
 
-    async DeletePosition(slug: string, user_id: number, isAdmin: boolean): Promise<string> {
+    async deletePosition(slug: string, userId: number, isAdmin: boolean): Promise<string> {
 
-        const findPosition: Position | null = await this.prismaService.position.findUnique({ where: { slug: slug }, 
-        select: { 
-            id: true,
-            name: true,
-            degree: true,
-            description: true,
-            salary: true,
-            slug: true,
-            companyId: true,
-            company: { select: { 
-                address: true,
-                email: true,
-                id: true, 
-                slug: true, 
-                description: true, 
-                phone: true,
+        const foundPosition: Position | null = await this.prismaService.position.findUnique({
+            where: { slug },
+            select: {
+                id: true,
                 name: true,
-                pictures: true,
-                ownerId: true,
-                owner: true
-            }}
-        }});
-    
-        if (!findPosition) {
-          throw new NotFoundException('position not found')
-        }
-    
-        if ((findPosition as any).company.ownerId != user_id && isAdmin !== true) {
-          throw new HttpException('you are not the owner', 400)
-        }
-        
-        await this.prismaService.position.delete({ where: { slug: slug }});
-    
-        
-        return "position deleted successfuly";
-    
-      }
+                degree: true,
+                description: true,
+                salary: true,
+                slug: true,
+                companyId: true,
+                company: {
+                    select: {
+                        address: true,
+                        email: true,
+                        id: true,
+                        slug: true,
+                        description: true,
+                        phone: true,
+                        name: true,
+                        pictures: true,
+                        ownerId: true,
+                        owner: true
+                    }
+                }
+            }
+        });
 
-    async ShowMyCompanyPositions(req): Promise<PositionGet[] | null> {
+        if (!foundPosition) {
+            throw new NotFoundException('position not found');
+        }
+
+        if ((foundPosition as any).company.ownerId !== userId && isAdmin !== true) {
+            throw new HttpException('you are not the owner', 400);
+        }
+
+        await this.prismaService.position.delete({ where: { slug } });
+
+        return "position deleted successfully";
+    }
+
+    async showMyCompanyPositions(req): Promise<PositionGet[] | null> {
 
         const company: Company | null = await this.prismaService.company.findUnique({
             where: {
@@ -207,36 +218,37 @@ export class PositionRepo{
                 companyId: company.id
             },
             select: {
-            id: true,
-            name: true,
-            degree: true,
-            description: true,
-            salary: true,
-            slug: true,
-            company: { select: { 
-                address: true,
-                email: true,
-                id: true, 
-                slug: true, 
-                description: true, 
-                phone: true,
+                id: true,
                 name: true,
-                pictures: true,
-            }}
+                degree: true,
+                description: true,
+                salary: true,
+                slug: true,
+                company: {
+                    select: {
+                        address: true,
+                        email: true,
+                        id: true,
+                        slug: true,
+                        description: true,
+                        phone: true,
+                        name: true,
+                        pictures: true,
+                    }
+                }
             }
         });
 
         return positions;
-
     }
 
-    async AllPositionOfCompany(company_slug: string): Promise<PositionGet[] | null> {
+    async allPositionsOfCompany(companySlug: string): Promise<PositionGet[] | null> {
 
         const company: Company | null = await this.prismaService.company.findUnique({
             where: {
-                slug: company_slug
+                slug: companySlug
             }
-        })
+        });
 
         if (!company) throw new NotFoundException('company not found');
 
@@ -245,57 +257,62 @@ export class PositionRepo{
                 companyId: company.id
             },
             select: {
-            id: true,
-            name: true,
-            degree: true,
-            description: true,
-            salary: true,
-            slug: true,
-            company: { select: { 
-                address: true,
-                email: true,
-                id: true, 
-                slug: true, 
-                description: true, 
-                phone: true,
+                id: true,
                 name: true,
-                pictures: true,
-            }}
+                degree: true,
+                description: true,
+                salary: true,
+                slug: true,
+                company: {
+                    select: {
+                        address: true,
+                        email: true,
+                        id: true,
+                        slug: true,
+                        description: true,
+                        phone: true,
+                        name: true,
+                        pictures: true,
+                    }
+                }
             }
-        })
+        });
 
         return positions;
     }
 
-    async SearchPositions(query: string): Promise<PositionGet[] | null | string> {
+    async searchPositions(query: string): Promise<PositionGet[] | null | string> {
 
         const positions: PositionGet[] | null = await this.prismaService.position.findMany({
             where: {
                 name: { contains: query, mode: "insensitive" },
             },
             select: {
-            id: true,
-            name: true,
-            degree: true,
-            description: true,
-            salary: true,
-            slug: true,
-            company: { select: { 
-                address: true,
-                email: true,
-                id: true, 
-                slug: true, 
-                description: true, 
-                phone: true,
+                id: true,
                 name: true,
-                pictures: true,
-            }}
+                degree: true,
+                description: true,
+                salary: true,
+                slug: true,
+                company: {
+                    select: {
+                        address: true,
+                        email: true,
+                        id: true,
+                        slug: true,
+                        description: true,
+                        phone: true,
+                        name: true,
+                        pictures: true,
+                    }
+                }
             }
         });
-        if (!positions) throw new HttpException('there is a problem in searching', 500)
 
-        if (positions.length == 0) return "No position found based on your query";
+        if (!positions) throw new HttpException('there is a problem in searching', 500);
 
-        return positions
+        if (positions.length === 0) return "No position found based on your query";
+
+        return positions;
     }
 }

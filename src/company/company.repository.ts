@@ -16,7 +16,7 @@ export class CompanyRepository {
     private readonly mailService: MailerService,
   ) {}
 
-  async FindOnEmail(email: string): Promise<Company | null> {
+  async findOnEmail(email: string): Promise<Company | null> {
     const company: Company | null = await this.prismaService.company.findUnique(
       {
         where: { email: email },
@@ -26,7 +26,7 @@ export class CompanyRepository {
     return company;
   }
 
-  async FindOnPhone(phone: string): Promise<Company | null> {
+  async findOnPhone(phone: string): Promise<Company | null> {
     const company: Company | null = await this.prismaService.company.findUnique(
       {
         where: { phone: phone },
@@ -36,7 +36,7 @@ export class CompanyRepository {
     return company;
   }
 
-  async FindOnSlug(slug: string): Promise<CompanyGet | null> {
+  async findOnSlug(slug: string): Promise<CompanyGet | null> {
 
     const company: CompanyGet | null = await this.prismaService.company.findUnique({
       where: { slug: slug },
@@ -59,7 +59,7 @@ export class CompanyRepository {
 
   }
 
-  async CreateCompany(input: CompanyRegisterInput, owner_id): Promise<Company | null> {
+  async createCompany(input: CompanyRegisterInput, owner_id): Promise<Company | null> {
 
     const baseSlug: string = await slugify(input.name, { lower: true });
     let slug: string = baseSlug;
@@ -87,7 +87,7 @@ export class CompanyRepository {
 
   }
 
-  async AttachPicture(files: Array<Express.Multer.File>, company_slug: string, req): Promise<string> {
+  async attachPicture(files: Array<Express.Multer.File>, company_slug: string, req): Promise<string> {
 
     const company: Company | null = await this.prismaService.company.findUnique({ where: { slug: company_slug } });
 
@@ -120,7 +120,7 @@ export class CompanyRepository {
     
   }
 
-  async UpdateCompany(input: CompanyUpdateInput, company_slug: string, user_id: number, isAdmin: boolean): Promise<Company> {
+  async updateCompany(input: CompanyUpdateInput, company_slug: string, user_id: number, isAdmin: boolean): Promise<Company> {
 
     const isCompanyExist: Company | null = await this.prismaService.company.findUnique({ where: { slug: company_slug }});
 
@@ -155,7 +155,7 @@ export class CompanyRepository {
 
   }
 
-  async DeleteCompany(slug: string, user_id: number, isAdmin: boolean): Promise<string> {
+  async deleteCompany(slug: string, user_id: number, isAdmin: boolean): Promise<string> {
 
     const findCompany: Company | null = await this.prismaService.company.findUnique({ where: { slug: slug }});
 
@@ -178,7 +178,7 @@ export class CompanyRepository {
 
   }
 
-  async ViewAll(): Promise<CompanyGet[] | null> {
+  async viewAll(): Promise<CompanyGet[] | null> {
 
     const allCompanies: CompanyGet[] | null = await this.prismaService.company.findMany({
       select: {
@@ -197,7 +197,7 @@ export class CompanyRepository {
 
   } 
 
-  async IsRequestAccepted(status: string, request_id: number,req, deny_reason?: string): Promise<string> {
+  async isRequestAccepted(status: string, request_id: number,req, deny_reason?: string): Promise<string> {
 
     if (status !== "accepted" && !deny_reason) throw new HttpException('internal error', 500);
 
@@ -311,7 +311,7 @@ export class CompanyRepository {
     return "request answered";
   }
   
-  async SearchCompanies(query: string): Promise<CompanyGet[] | null | string> {
+  async searchCompanies(query: string): Promise<CompanyGet[] | null | string> {
   
     const companies: CompanyGet[] | null =
       await this.prismaService.company.findMany({
@@ -338,7 +338,7 @@ export class CompanyRepository {
     return companies;
   }
   
-  async ShowMyCompany(req): Promise<CompanyGet> {
+  async showMyCompany(req): Promise<CompanyGet> {
 
     const myCompany: CompanyGet | null = await this.prismaService.company.findUnique({
       where: {

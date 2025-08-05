@@ -10,53 +10,43 @@ export class TicketService {
         private readonly ticketRepo: TicketRepo,
     ) {}
 
-    async CreateTicket(input: TicketMakeDto, req): Promise<Record<string, string>> {
-
-        const result: Record<string, string> = await this.ticketRepo.CreateTicket(input, req);
-
+    async createTicket(input: TicketMakeDto, req): Promise<Record<string, string>> {
+        const result: Record<string, string> = await this.ticketRepo.createTicket(input, req);
         return result;
     }
 
-    async UserViewTicket(slug: string, req): Promise<Omit<Ticket, "userId" | "adminUserId">> {
-
-        const ticket: Omit<Ticket, "userId" | "adminUserId"> = await this.ticketRepo.UserViewTicket(slug, req);
-
+    async userViewTicket(slug: string, req): Promise<Omit<Ticket, "userId" | "adminUserId">> {
+        const ticket: Omit<Ticket, "userId" | "adminUserId"> = await this.ticketRepo.userViewTicket(slug, req);
         return ticket;
     }
 
-    async AdminViewTickets(): Promise<Omit<Ticket, "userId" | "adminUserId">[]> {
-        const tickets: Omit<Ticket, "userId" | "adminUserId">[] = await this.ticketRepo.AdminViewTickets();
-
+    async adminViewTickets(): Promise<Omit<Ticket, "userId" | "adminUserId">[]> {
+        const tickets: Omit<Ticket, "userId" | "adminUserId">[] = await this.ticketRepo.adminViewTickets();
         return tickets;
     }
 
-    async AdminAttach(req, ticket_slug: string): Promise<string> {
-        const result: string = await this.ticketRepo.AdminAttach(req, ticket_slug);
-
+    async adminAttach(req, ticketSlug: string): Promise<string> {
+        const result: string = await this.ticketRepo.adminAttach(req, ticketSlug);
         return result;
     }
 
-    async SendMessage(input: MessageDTO, ticket_slug: string, req): Promise<string> {
-        const result: string = await this.ticketRepo.SendMessage(input, ticket_slug, req);
-
+    async sendMessage(input: MessageDTO, ticketSlug: string, req): Promise<string> {
+        const result: string = await this.ticketRepo.sendMessage(input, ticketSlug, req);
         return result;
     }
 
-    async MyTickets(req): Promise<Omit<Ticket, "userId" | "adminUserId">[]> {
-        const tickets: Omit<Ticket, "userId" | "adminUserId">[] = await this.ticketRepo.MyTickets(req);
-
+    async myTickets(req): Promise<Omit<Ticket, "userId" | "adminUserId">[]> {
+        const tickets: Omit<Ticket, "userId" | "adminUserId">[] = await this.ticketRepo.myTickets(req);
         return tickets;
     }
 
-    async DeleteTicket(ticket_slug: string, req): Promise<string> {
-        const result: string = await this.DeleteTicket(ticket_slug, req);
-
+    async deleteTicket(ticketSlug: string, req): Promise<string> {
+        const result: string = await this.ticketRepo.deleteTicket(ticketSlug, req);
         return result;
     }
 
-    async UpdateTicket(input: TicketUpdateDto, ticket_slug: string, req): Promise<string> {
-        const result: string = await this.ticketRepo.UpdateTicket(input, ticket_slug, req);
-
+    async updateTicket(input: TicketUpdateDto, ticketSlug: string, req): Promise<string> {
+        const result: string = await this.ticketRepo.updateTicket(input, ticketSlug, req);
         return result;
     }
 }

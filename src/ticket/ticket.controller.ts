@@ -18,12 +18,11 @@ export class TicketController {
     @Post('create')
     @HttpCode(HttpStatus.CREATED)
     @UseGuards(AuthGuard)
-    async CreateTicket(
+    async createTicket(
         @Body() input: TicketMakeDto,
         @Req() req,
     ) {
-        const result: Record<string, string> = await this.ticketService.CreateTicket(input, req);
-
+        const result: Record<string, string> = await this.ticketService.createTicket(input, req);
         return { slug: result.slug, message: result.message, success: true };
     }
 
@@ -31,10 +30,8 @@ export class TicketController {
     @Post('alltickets')
     @HttpCode(HttpStatus.OK)
     @UseGuards(AuthGuard, AdminGuard)
-    async AdminViewTickets() {
-
-        const result: Omit<Ticket, "userId" | "adminUserId">[] = await this.ticketService.AdminViewTickets();
-
+    async adminViewTickets() {
+        const result: Omit<Ticket, "userId" | "adminUserId">[] = await this.ticketService.adminViewTickets();
         return { tickets: result, success: true };
     }
 
@@ -43,12 +40,11 @@ export class TicketController {
     @HttpCode(HttpStatus.OK)
     @Post('attach/:slug')
     @UseGuards(AuthGuard, AdminGuard)
-    async AdminAttach(
-        @Param('slug') ticket_slug: string,
+    async adminAttach(
+        @Param('slug') ticketSlug: string,
         @Req() req
     ): Promise<any> {
-        const result: string = await this.ticketService.AdminAttach(req, ticket_slug);
-
+        const result: string = await this.ticketService.adminAttach(req, ticketSlug);
         return { message: result, success: true };
     }
 
@@ -57,13 +53,12 @@ export class TicketController {
     @HttpCode(HttpStatus.OK)
     @Post('message/:slug')
     @UseGuards(AuthGuard)
-    async SendMessage(
+    async sendMessage(
         @Body() input: MessageDTO,
-        @Param('slug') ticket_slug: string,
+        @Param('slug') ticketSlug: string,
         @Req() req
     ): Promise<any> {
-        const result: string = await this.ticketService.SendMessage(input, ticket_slug, req);
-
+        const result: string = await this.ticketService.sendMessage(input, ticketSlug, req);
         return { message: result, success: true };
     }
 
@@ -71,11 +66,10 @@ export class TicketController {
     @Post('mytickets')
     @HttpCode(HttpStatus.OK)
     @UseGuards(AuthGuard)
-    async MyTickets(
+    async myTickets(
         @Req() req
     ): Promise<any> {
-        const tickets: Omit<Ticket, "userId" | "adminUserId">[] = await this.ticketService.MyTickets(req);
-
+        const tickets: Omit<Ticket, "userId" | "adminUserId">[] = await this.ticketService.myTickets(req);
         return { tickets, success: true };
     }
 
@@ -84,12 +78,11 @@ export class TicketController {
     @Post('delete/:slug')
     @HttpCode(HttpStatus.OK)
     @UseGuards(AuthGuard)
-    async DeleteTicket(
-        @Param('slug') ticket_slug: string,
+    async deleteTicket(
+        @Param('slug') ticketSlug: string,
         @Req() req
     ): Promise<any> {
-        const result: string = await this.ticketService.DeleteTicket(ticket_slug, req);
-
+        const result: string = await this.ticketService.deleteTicket(ticketSlug, req);
         return { success: true, message: result };
     }
 
@@ -98,13 +91,12 @@ export class TicketController {
     @Put('update/:slug')
     @HttpCode(HttpStatus.OK)
     @UseGuards(AuthGuard)
-    async UpdateTicket(
-        @Param('slug') ticket_slug: string,
+    async updateTicket(
+        @Param('slug') ticketSlug: string,
         @Body() input: TicketUpdateDto,
         @Req() req
     ): Promise<any> {
-        const result: string = await this.ticketService.UpdateTicket(input, ticket_slug, req);
-
+        const result: string = await this.ticketService.updateTicket(input, ticketSlug, req);
         return { success: true, message: result };
     }
 
@@ -113,13 +105,11 @@ export class TicketController {
     @Post(':slug')
     @HttpCode(HttpStatus.OK)
     @UseGuards(AuthGuard)
-    async UserViewTicket(
+    async userViewTicket(
         @Param('slug') slug: string,
         @Req() req,
     ) {
-
-        const result: Omit<Ticket, "userId" | "adminUserId"> = await this.ticketService.UserViewTicket(slug, req);
-
+        const result: Omit<Ticket, "userId" | "adminUserId"> = await this.ticketService.userViewTicket(slug, req);
         return { ticket: result, success: true };
     }
 }

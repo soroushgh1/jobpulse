@@ -13,7 +13,7 @@ export class AuthRepository {
     @Inject("REDIS_CLIENT") private readonly redisClient: Redis
   ) {}
 
-  async FindOnEmail(email: string): Promise<User | null> {
+  async findOnEmail(email: string): Promise<User | null> {
     const user: User | null = await this.prismaService.user.findUnique({
       where: { email: email },
     });
@@ -21,7 +21,7 @@ export class AuthRepository {
     return user;
   }
 
-  async FindOnPhone(phone: string): Promise<User | null> {
+  async findOnPhone(phone: string): Promise<User | null> {
     const user: User | null = await this.prismaService.user.findUnique({
       where: { phone: phone },
     });
@@ -29,12 +29,12 @@ export class AuthRepository {
     return user;
   }
 
-  async FindOnId(id: number): Promise<User | null> {
+  async findOnId(id: number): Promise<User | null> {
     const user: User | null = await this.prismaService.user.findUnique({ where: { id: id } });
     return user;
   }
 
-  async CreateUser(input: UserRegisterInput): Promise<User | null> {
+  async createUser(input: UserRegisterInput): Promise<User | null> {
     const hashedPassword: string = await bcrypt.hash(input.password, 10);
 
     const user: User | null = await this.prismaService.user.create({

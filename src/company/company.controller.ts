@@ -44,11 +44,11 @@ export class CompanyController {
   @Post('create')
   @HttpCode(201)
   @UseGuards(AuthGuard, CompanyGuard)
-  async CreateCompany(
+  async createCompany(
     @Body() input: CompanyRegisterInput,
     @Req() req
   ): Promise<any> {
-    const result: string = await this.companyService.CreateCompany(input, req);
+    const result: string = await this.companyService.createCompany(input, req);
     return { message: result, success: true };
   }
 
@@ -82,7 +82,7 @@ export class CompanyController {
   )
   @HttpCode(201)
   @ApiResponse(docs.attachPictureOK)
-  async AttachPicture(
+  async attachPicture(
     @UploadedFiles(
       new ParseFilePipeBuilder().build({
         fileIsRequired: true,
@@ -97,7 +97,7 @@ export class CompanyController {
 
     if (req.fileValidationErr) return { success: false, error: req.fileValidationErr };
 
-    const result: string = await this.companyService.AttachPicture(files, slug, req);
+    const result: string = await this.companyService.attachPicture(files, slug, req);
 
     return { success: true, result: result };
   }
@@ -113,22 +113,22 @@ export class CompanyController {
   @ApiResponse(docs.updateCompanyBAD)
   @HttpCode(200)
   @UseGuards(AuthGuard, CompanyGuard)
-  async UpdateCompany(
+  async updateCompany(
     @Body() input: CompanyUpdateInput,
     @Req() req,
     @Param('slug') company_slug: string
   ): Promise<any> {
-    const result: string = await this.companyService.UpdateCompany(input, company_slug, req);
+    const result: string = await this.companyService.updateCompany(input, company_slug, req);
     return { message: result, success: true };
   }
 
   @UseGuards(AuthGuard, CompanyGuard)
   @Post('getme')
   @HttpCode(200)
-  async ShowMyCompany(
+  async showMyCompany(
     @Req() req
   ): Promise<any> {
-    const company: CompanyGet | null = await this.companyService.ShowMyCompany(req);
+    const company: CompanyGet | null = await this.companyService.showMyCompany(req);
     return { company, success: true };
   }
 
@@ -143,8 +143,8 @@ export class CompanyController {
   @Delete('delete/:slug')
   @HttpCode(200)
   @UseGuards(AuthGuard, CompanyGuard)
-  async DeleteCompany(@Param('slug') company_slug: string, @Req() req): Promise<any> {
-    const result: string = await this.companyService.DeleteCompany(company_slug, req);
+  async deleteCompany(@Param('slug') company_slug: string, @Req() req): Promise<any> {
+    const result: string = await this.companyService.deleteCompany(company_slug, req);
     return { success: true, message: result };
   }
 
@@ -152,8 +152,8 @@ export class CompanyController {
   @ApiResponse(docs.viewAllOK)
   @ApiResponse(docs.viewAllINTERNALERROR)
   @HttpCode(200)
-  async ViewAll(): Promise<any> {
-    return { companies: await this.companyService.ViewAll(), success: true };
+  async viewAll(): Promise<any> {
+    return { companies: await this.companyService.viewAll(), success: true };
   }
 
   @ApiParam({
@@ -166,12 +166,12 @@ export class CompanyController {
   @Post('denyrequest/:request_id')
   @HttpCode(200)
   @UseGuards(AuthGuard, CompanyGuard)
-  async DenyRequest(
+  async denyRequest(
     @Body() input: DenyRequestInput,
     @Param('request_id') request_id: number,
     @Req() req
   ): Promise<any> {
-    const result: string = await this.companyService.DenyRequest(input, request_id, req);
+    const result: string = await this.companyService.denyRequest(input, request_id, req);
     return { message: result, success: true };
   }
 
@@ -185,19 +185,19 @@ export class CompanyController {
   @Post('acceptrequest/:request_id')
   @HttpCode(200)
   @UseGuards(AuthGuard, CompanyGuard)
-  async AcceptRequest(
+  async acceptRequest(
     @Body() input: DenyRequestInput,
     @Param('request_id') request_id: number,
     @Req() req
   ): Promise<any> {
-    const result: string = await this.companyService.AcceptRequest(request_id, req);
+    const result: string = await this.companyService.acceptRequest(request_id, req);
     return { message: result, success: true };
   }
 
   @Get('search')
   @HttpCode(200)
-  async SearchCompanies(@Query('q') query: string): Promise<any> {
-    const result: CompanyGet[] | null | string = await this.companyService.SearchCompanies(query);
+  async searchCompanies(@Query('q') query: string): Promise<any> {
+    const result: CompanyGet[] | null | string = await this.companyService.searchCompanies(query);
     return { result: result, success: true };
   }
 
@@ -209,10 +209,10 @@ export class CompanyController {
   @ApiResponse(docs.showCompanyOK)
   @ApiResponse(docs.showCompanyNOTFOUND)
   @Get(':slug')
-  async GetCompany(
+  async getCompany(
     @Param('slug') slug: string
   ): Promise<any> {
-    const company: CompanyGet = await this.GetCompany(slug);
+    const company: CompanyGet = await this.getCompany(slug);
 
     return { company, success: true };
   }
