@@ -21,7 +21,7 @@ import { JobSeekerService } from '../services/job_seeker.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { MakeUniqueFileName } from 'src/utils/helpers';
-import { DeleteFileInterceptor } from 'src/interceptors/DeleteFileInterceptor.interceptor';
+import { DeleteFileInterceptor } from 'src/interceptors/deleteFile.interceptor';
 import * as docs from 'src/docs/job_seeker.docs';
 
 @ApiTags('jobseeker')

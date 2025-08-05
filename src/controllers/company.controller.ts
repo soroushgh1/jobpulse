@@ -30,7 +30,7 @@ import { ApiParam, ApiResponse } from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { MakeUniqueFileName } from 'src/utils/helpers';
-import { DeleteFilesInterceptor } from '../interceptors/DeleteFilesInterceptor.interceptor';
+import { DeleteFilesInterceptor } from '../interceptors/deleteFiles.interceptor';
 import * as docs from 'src/docs/company.docs';
 
 @Controller('company')
