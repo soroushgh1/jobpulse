@@ -2,7 +2,7 @@ import { HttpException, Inject, Injectable, NotFoundException } from "@nestjs/co
 import { Company, Position, PrismaClient, User } from "@prisma/client";
 import { prismaProvider } from "src/prisma/prisma.provider";
 import slugify from "slugify";
-import { PositionGet } from "src/types/types";
+import { CompanyGet, PositionGet } from "src/types/types";
 import { CreatePositionInput, UpdatePositionInput } from "../dtos/position.dto";
 
 @Injectable()
@@ -281,9 +281,9 @@ export class PositionRepo {
         return positions;
     }
 
-    async searchPositions(query: string): Promise<PositionGet[] | null | string> {
+    async searchPositions(query: string): Promise<PositionGet[] | string> {
 
-        const positions: PositionGet[] | null = await this.prismaService.position.findMany({
+        const positions: PositionGet[] = await this.prismaService.position.findMany({
             where: {
                 name: { contains: query, mode: "insensitive" },
             },
@@ -309,10 +309,39 @@ export class PositionRepo {
             }
         });
 
-        if (!positions) throw new HttpException('there is a problem in searching', 500);
-
         if (positions.length === 0) return "No position found based on your query";
 
         return positions;
     }
+
+    async allPositions(): Promise<PositionGet[]> {
+
+        const positions: PositionGet[] = await this.prismaService.position.findMany({
+            select: {
+                id: true,
+                name: true,
+                degree: true,
+                description: true,
+                salary: true,
+                slug: true,
+                company: {
+                    select: {
+                        address: true,
+                        email: true,
+                        id: true,
+                        slug: true,
+                        description: true,
+                        phone: true,
+                        name: true,
+                        pictures: true,
+                    }
+                }
+            }
+        });
+
+        if (positions.length === 0) return [];
+
+        return positions;
+    }
+    
 }

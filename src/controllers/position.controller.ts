@@ -76,4 +76,12 @@ export class PositionController {
         const result: PositionGet[] | null | string = await this.positionService.searchPositions(query);
         return { result, success: true };
     }
+
+    @Get('allpositions')
+    @HttpCode(200)
+    @ApiResponse(docs.searchPositionsOK)
+    async allPositions(): Promise<any> {
+        const result: PositionGet[] = await this.positionService.allPositions();
+        return { result, success: true };
+    }
 }

@@ -48,4 +48,10 @@ export class PositionService {
         const result: PositionGet[] | null | string = await this.positionRepo.searchPositions(query);
         return result;
     }
+
+    async allPositions(): Promise<PositionGet[]> {
+        const result: PositionGet[] = await this.positionRepo.allPositions();
+        return result;
+    }
+
 }
