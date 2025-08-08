@@ -3,6 +3,7 @@ import {
   HttpException,
   Inject,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { PositionRepo } from 'src/repositories/position.repository';
@@ -50,6 +51,8 @@ export class JobSeekerRepo {
 
   async deleteRequest(positionSlug: string, req): Promise<string> {
     const findPosition: Position | null = await this.positionRepo.findBySlug(positionSlug);
+
+    if (!findPosition) throw new NotFoundException('position not found');
 
     const isRequestExist: Request | null = await this.prismaService.request.findFirst({
       where: {
@@ -99,6 +102,8 @@ export class JobSeekerRepo {
   async showAllRequestsForPosition(positionSlug: string, req): Promise<any> {
     const findPosition: Position | null = await this.positionRepo.findBySlug(positionSlug);
 
+    if (!findPosition) throw new NotFoundException('position not found');
+
     const findCompany: Company | null = await this.prismaService.company.findUnique({
       where: {
         id: findPosition?.companyId,
@@ -134,6 +139,8 @@ export class JobSeekerRepo {
 
   async showAllAcceptedsForPosition(positionSlug: string, req): Promise<any> {
     const findPosition: Position | null = await this.positionRepo.findBySlug(positionSlug);
+
+    if (!findPosition) throw new NotFoundException('position not found');
 
     const findCompany: Company | null = await this.prismaService.company.findUnique({
       where: {

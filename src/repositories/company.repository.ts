@@ -7,6 +7,7 @@ import Redis from 'ioredis';
 import { MailerService } from '@nestjs-modules/mailer';
 import { promises as fs } from 'fs'
 import * as path from 'path';
+import { PositionRepo } from './position.repository';
 
 @Injectable()
 export class CompanyRepository {
@@ -14,6 +15,7 @@ export class CompanyRepository {
     @Inject("PRISMA_CLIENT") private readonly prismaService: PrismaClient,
     @Inject("REDIS_CLIENT") private readonly redisClient: Redis,
     private readonly mailService: MailerService,
+    private readonly positionRepo: PositionRepo,
   ) {}
 
   async findOnEmail(email: string): Promise<Company | null> {
@@ -361,4 +363,40 @@ export class CompanyRepository {
     return myCompany;
   }
 
+  async deleteRequestsForPosition(request_id: number, req): Promise<string> {
+
+    const findRequest = await this.prismaService.request.findUnique({
+      where: {
+        id: request_id
+      },
+      include: { 
+        position: {
+          include: {
+            company: true
+          }
+        }
+      },
+    });
+    
+    if (!findRequest) throw new NotFoundException('request not found');
+
+    const findCompany: Company | null = await this.prismaService.company.findUnique({
+      where: {
+        id: findRequest?.position.companyId,
+      },
+    });
+
+    if (findCompany?.ownerId !== req.user.id && req.user.isAdmin !== true) {
+      throw new UnauthorizedException('you are not the owner of the company for deleting the requests');
+    }
+
+    await this.prismaService.request.delete({
+      where: {
+        id: request_id
+      }
+    });
+
+    return "request deleted successfuly";
+  }
+  
 }

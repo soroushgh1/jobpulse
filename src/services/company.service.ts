@@ -98,4 +98,10 @@ export class CompanyService {
       return company;
   }
   
+  async deleteRequestsForPosition(request_id: number, req): Promise<string> {
+
+    const result: string = await this.companyRepo.deleteRequestsForPosition(request_id, req);
+    
+    return result;
+  }
 }

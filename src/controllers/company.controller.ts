@@ -217,4 +217,16 @@ export class CompanyController {
     return { company, success: true };
   }
   
+  @Post('deleterequest/:request_id')
+  @UseGuards(AuthGuard, CompanyGuard)
+  @HttpCode(200)
+  async deleteRequestsForPosition(
+    @Param('request_id') request_id: number,
+    @Req() req
+  ): Promise<any> {
+    const result: string = await this.companyService.deleteRequestsForPosition(request_id, req);
+
+    return { result, success: true };
+  }
+  
 }
