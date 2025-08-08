@@ -199,4 +199,10 @@ export class AuthService {
       return 'Login was successful';
   }
   
+  async findAll(): Promise<Omit<User, "password">[]> {
+    const users: Omit<User, "password">[] = await this.authrepo.findAll();
+
+    return users;
+  }
+
 }

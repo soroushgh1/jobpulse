@@ -105,3 +105,25 @@ export const adminLoginBAD = {
     message: 'user not found',
   },
 };
+
+export const findAllOK = {
+  status: 200,
+  example: {
+    users: [
+      {
+        id: 1,
+        username: "soroush12345",
+        phone: "0910000000",
+        role: "job_seeker",
+        email: "example@gmail.com"
+      },
+      {
+        id: 2,
+        username: "johndoe12345",
+        phone: "0910000001",
+        role: "company",
+        email: "example1@gmail.com"
+      }
+    ]
+  }
+};

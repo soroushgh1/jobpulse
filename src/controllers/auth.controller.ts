@@ -1,9 +1,10 @@
-import { Body, Controller, HttpCode, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AdminLoginInput, AdminRegisterInput, UserLoginInput, UserRegisterInput } from '../dtos/auth.dto';
 import { AuthService } from '../services/auth.service';
 import { Response } from 'express';
 import { ApiResponse } from '@nestjs/swagger';
 import * as docs from 'src/docs/auth.docs';
+import { User } from '@prisma/client';
 
 @Controller('auth')
 export class AuthController {
@@ -77,4 +78,14 @@ export class AuthController {
     const result: string = await this.authservice.loginAdmin(admininput, res);
     res.status(200).json({ message: result, success: true });
   }
+
+  @ApiResponse(docs.findAllOK)
+  @HttpCode(200)
+  @Get("allusers")
+  async findAll(): Promise<any> {
+    const users: Omit<User, "password">[] = await this.authservice.findAll();
+
+    return { users, success: true };
+  }
+
 }

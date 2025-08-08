@@ -52,4 +52,21 @@ export class AuthRepository {
     return user;
   }
 
+  async findAll(): Promise<Omit<User, "password">[]> {
+
+    const users: Omit<User, "password">[] = await this.prismaService.user.findMany({
+      select: {
+        id: true,
+        phone: true,
+        email: true,
+        role: true,
+        username: true
+      }
+    });
+
+    if (users.length == 0 || users == null) return [];
+
+    return users;
+  }
+
 }
