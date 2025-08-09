@@ -5,6 +5,8 @@ import { Response } from 'express';
 import { ApiResponse } from '@nestjs/swagger';
 import * as docs from 'src/docs/auth.docs';
 import { User } from '@prisma/client';
+import { AuthGuard } from 'src/guards/auth.guard';
+import { AdminGuard } from 'src/guards/admin.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -81,7 +83,8 @@ export class AuthController {
 
   @ApiResponse(docs.findAllOK)
   @HttpCode(200)
-  @Get("allusers")
+  @Post("allusers")
+  @UseGuards(AuthGuard, AdminGuard)
   async findAll(): Promise<any> {
     const users: Omit<User, "password">[] = await this.authservice.findAll();
 
