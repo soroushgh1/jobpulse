@@ -9,10 +9,11 @@ import { RedisModule } from 'src/redis/redis.module';
 import { prismaProvider } from 'src/prisma/prisma.provider';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { redisProvider } from 'src/redis/redis.provider';
+import { PositionModule } from './position.module';
 
 @Module({
   controllers: [CompanyController],
   providers: [CompanyService, CompanyRepository, prismaProvider, AuthGuard, JwtService, AuthRepository, redisProvider],
-  imports: [PrismaModule, RedisModule]
+  imports: [PrismaModule, RedisModule, PositionModule]
 })
 export class CompanyModule {}

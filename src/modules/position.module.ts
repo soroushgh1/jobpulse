@@ -11,6 +11,7 @@ import { PrismaModule } from 'src/prisma/prisma.module';
 @Module({
   providers: [PositionService, PositionRepo, prismaProvider, JwtService, AuthGuard, AuthRepository],
   controllers: [PositionController],
-  imports: [PrismaModule]
+  imports: [PrismaModule],
+  exports: [PositionRepo, PositionService]
 })
 export class PositionModule {}
