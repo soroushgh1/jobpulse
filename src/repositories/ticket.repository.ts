@@ -157,7 +157,16 @@ export class TicketRepo {
                 subject: true,
                 description: true,
                 isAnswered: true,
-                id: true
+                id: true,
+                messages: {
+                    select:{
+                        reply_to_id: true,
+                        text: true,
+                        created_at: true,
+                        user_id: true,
+                        id: true
+                    }
+                },
             }
         });
 
