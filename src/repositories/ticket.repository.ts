@@ -39,7 +39,25 @@ export class TicketRepo {
 
     async userViewTicket(slug: string, req): Promise<Omit<Ticket, "userId" | "adminUserId">> {
 
-        const ticket: Ticket | null = await this.prismaClient.ticket.findUnique({ where: { slug } });
+        const ticket: Ticket | null = await this.prismaClient.ticket.findUnique({ where: { slug },
+        select: {
+            slug: true,
+            subject: true,
+            description: true,
+            isAnswered: true,
+            id: true,
+            messages: {
+                select:{
+                    reply_to_id: true,
+                    text: true,
+                    created_at: true,
+                    user_id: true,
+                    id: true
+                }
+            },
+            userId: true,
+            adminUserId: true
+        } });
 
         if (!ticket) throw new NotFoundException('ticket not found');
         if (ticket.userId !== req.user.id && req.user.isAdmin === false) throw new UnauthorizedException('you can not access other people tickets');
@@ -57,7 +75,18 @@ export class TicketRepo {
                 subject: true,
                 description: true,
                 isAnswered: true,
-                id: true
+                id: true,
+                messages: {
+                    select:{
+                        reply_to_id: true,
+                        text: true,
+                        created_at: true,
+                        user_id: true,
+                        id: true
+                    }
+                },
+                adminUserId: true,
+                userId: true
             }
         });
 
