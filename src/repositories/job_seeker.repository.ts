@@ -106,7 +106,7 @@ export class JobSeekerRepo {
 
     const findCompany: Company | null = await this.prismaService.company.findUnique({
       where: {
-        id: findPosition?.companyId,
+        id: findPosition.companyId,
       },
     });
 
@@ -116,8 +116,8 @@ export class JobSeekerRepo {
 
     const requests: any = await this.prismaService.request.findMany({
       where: {
-        positionId: findPosition?.id,
-        denyReason: 'pending',
+        positionId: findPosition.id,
+        isAccept: 'pending'
       },
       select: {
         id: true,
