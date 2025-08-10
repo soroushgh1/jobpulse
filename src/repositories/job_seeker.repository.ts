@@ -137,6 +137,45 @@ export class JobSeekerRepo {
     return requests;
   }
 
+  async showAllRequests(req): Promise<any> {
+
+    const findCompany: Company | null = await this.prismaService.company.findUnique({
+      where: {
+        ownerId: req.user.id
+      },
+    });
+
+    if (!findCompany) throw new NotFoundException('company not found');
+
+    if (findCompany.ownerId !== req.user.id && req.user.isAdmin !== true) {
+      throw new UnauthorizedException('you are not the owner of the company for checking the requests');
+    }
+
+    const requests: any = await this.prismaService.request.findMany({
+      where: {
+        position: {
+          companyId: findCompany.id
+        },
+        isAccept: 'pending'
+      },
+      select: {
+        id: true,
+        resume: true,
+        isAccept: true,
+        denyReason: true,
+        position: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+      },
+    });
+
+    return requests;
+  }
+
   async showAllAcceptedsForPosition(positionSlug: string, req): Promise<any> {
     const findPosition: Position | null = await this.positionRepo.findBySlug(positionSlug);
 

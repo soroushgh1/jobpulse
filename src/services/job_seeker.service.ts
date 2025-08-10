@@ -26,6 +26,11 @@ export class JobSeekerService {
     return requests;
   }
 
+  async showAllRequests(req): Promise<any> {
+    const requests: any = await this.jobSeekerRepo.showAllRequests(req);
+    return requests;
+  }
+
   async showAllAcceptedsForPosition(positionSlug: string, req): Promise<any> {
     const requests: any = await this.jobSeekerRepo.showAllAcceptedsForPosition(positionSlug, req);
     return requests;

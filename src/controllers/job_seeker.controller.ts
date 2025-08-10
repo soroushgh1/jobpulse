@@ -103,6 +103,16 @@ export class JobSeekerController {
     return { requests, success: true };
   }
 
+  @ApiResponse(docs.showAllRequestsOK)
+  @ApiResponse(docs.showAllRequestsUNAUTHORIZED)
+  @Post('allrequests')
+  @UseGuards(AuthGuard, CompanyGuard)
+  @HttpCode(200)
+  async showAllRequests(@Req() req): Promise<any> {
+    const requests: any = await this.jobSeekerService.showAllRequests(req);
+    return { requests, success: true };
+  }
+
   @ApiParam({
     name: 'slug',
     type: 'string',
