@@ -131,6 +131,13 @@ export class JobSeekerRepo {
             slug: true,
           },
         },
+        user: {
+          select: {
+            username: true,
+            email: true,
+            phone: true
+          }
+        }
       },
     });
 
@@ -170,6 +177,13 @@ export class JobSeekerRepo {
             slug: true,
           },
         },
+        user: {
+          select: {
+            username: true,
+            email: true,
+            phone: true
+          }
+        }
       },
     });
 
