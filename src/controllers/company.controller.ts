@@ -167,7 +167,6 @@ export class CompanyController {
   @HttpCode(200)
   @UseGuards(AuthGuard, CompanyGuard)
   async denyRequest(
-    @Body() input: DenyRequestInput,
     @Param('request_id') request_id: number,
     @Req() req
   ): Promise<any> {
