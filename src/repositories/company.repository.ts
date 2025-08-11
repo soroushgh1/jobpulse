@@ -1,4 +1,4 @@
-import { HttpException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, HttpException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { Company, Position, PrismaClient, Request, User } from '@prisma/client';
 import { CompanyRegisterInput, CompanyUpdateInput } from '../dtos/company.dto';
 import slugify from 'slugify';
@@ -207,11 +207,13 @@ export class CompanyRepository {
       }
     });
 
+    if (!isRequestExist) throw new NotFoundException('request not found');
+
+    if (isRequestExist.isAccept == "pending") throw new BadRequestException('request is already answered')
+
     const user: User | null = await this.prismaService.user.findUnique({ where: {
       id: isRequestExist?.id
     }});
-
-    if (!isRequestExist) throw new NotFoundException('request not found');
 
     const position: Position | null = await this.prismaService.position.findUnique({
       where: {
