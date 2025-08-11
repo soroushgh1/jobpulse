@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { RedisModule } from './redis/redis.module';
-import { MailerModule } from '@nestjs-modules/mailer';
 import { PrismaModule } from './prisma/prisma.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { ServeStaticModule } from "@nestjs/serve-static";
@@ -24,15 +23,6 @@ import { TicketModule } from './modules/ticket.module';
     JobSeekerModule,
     PositionModule,
     RedisModule,
-    MailerModule.forRoot({
-      transport: {
-        host: process.env.EMAIL_HOST,
-        auth: {
-          user: process.env.EMAIL_USERNAME,
-          pass: process.env.EMAIL_PASSWORD
-        },
-      },
-    }),
     PrismaModule,
     MulterModule.register({
       dest: './uploads'

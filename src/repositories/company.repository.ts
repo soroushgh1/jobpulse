@@ -4,7 +4,6 @@ import { CompanyRegisterInput, CompanyUpdateInput } from '../dtos/company.dto';
 import slugify from 'slugify';
 import { CompanyGet } from 'src/types/types';
 import Redis from 'ioredis';
-import { MailerService } from '@nestjs-modules/mailer';
 import { promises as fs } from 'fs'
 import * as path from 'path';
 import { PositionRepo } from './position.repository';
@@ -14,7 +13,6 @@ export class CompanyRepository {
   constructor(
     @Inject("PRISMA_CLIENT") private readonly prismaService: PrismaClient,
     @Inject("REDIS_CLIENT") private readonly redisClient: Redis,
-    private readonly mailService: MailerService,
     private readonly positionRepo: PositionRepo,
   ) {}
 
@@ -256,13 +254,6 @@ export class CompanyRepository {
       <br>
       <h2> Your request for ${company.name} has been accepted ! </h2>
       `;
-
-      await this.mailService.sendMail({
-        from: 'jobPulse',
-        to: user?.email,
-        subject: 'Request accepted !',
-        text: emailMessage
-      });
       
       await this.redisClient.set(`user-${isRequestExist.userId}-note`, JSON.stringify(userNote));
     };
@@ -292,13 +283,6 @@ export class CompanyRepository {
       <br>
       <h2> Reason : ${deny_reason} <h1>
       `;
-
-      await this.mailService.sendMail({
-        from: 'jobPulse',
-        to: user?.email,
-        subject: 'Request denied',
-        text: emailMessage
-      });
 
       await this.redisClient.set(`user-${isRequestExist.userId}-note`, JSON.stringify(userNote));
     };
