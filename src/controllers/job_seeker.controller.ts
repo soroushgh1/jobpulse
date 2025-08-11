@@ -145,4 +145,14 @@ export class JobSeekerController {
     const user = await this.jobSeekerService.getMe(req.user.id);
     return { success: true, user: user };
   }
+
+  @Post('deletenotif/:id')
+  @UseGuards(AuthGuard)
+  @HttpCode(200)
+  async deleteNotification(@Param('id') notification_id: number, @Req() req): Promise<any> {
+    
+    const result: string = await this.jobSeekerService.deleteNotification(notification_id, req);
+
+    return { result, success: true };
+  }
 }

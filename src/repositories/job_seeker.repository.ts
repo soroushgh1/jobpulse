@@ -249,4 +249,30 @@ export class JobSeekerRepo {
       },
     });
   }
+
+  async deleteNotification(notification_id: number, req): Promise<string> {
+
+    const userNotesJson: string | null = await this.redisClient.get(`user-${req.user.id}-note`);
+
+    if (!userNotesJson) throw new BadRequestException('there is a problem in your notification');
+
+    let userNote: {}[] = JSON.parse(userNotesJson);
+
+    let doesNotifExists: boolean = false;
+
+    userNote.forEach((note: any) => {
+      if (note.id == notification_id) doesNotifExists = true
+    })
+
+    if (!doesNotifExists) throw new NotFoundException('notification does not exist');
+
+    userNote.filter((note: any) => {
+      return note.id != notification_id 
+    })
+
+    await this.redisClient.set(`user-${req.user.id}-note`, JSON.stringify(userNote));
+
+    return "delete successful";
+  }
+
 }

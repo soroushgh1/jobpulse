@@ -243,20 +243,18 @@ export class CompanyRepository {
         throw new HttpException('there is a problem in sending notification for user', 500);
       }
 
-      let userNote: string[];
+      let userNote: {}[];
 
       userNote = JSON.parse(userNoteJson);
       
-      const notification: string = `your request for ${position.name} has been accepted !`;
+      const notification: {} = { 
+        text: `your request for ${position.name} has been accepted !`,
+        id: userNote.length,
+        time: new Date()
+      };
 
       userNote.push(notification);
 
-      const emailMessage: string = `
-      <h1> Dear ${user?.username} </h1>
-      <br>
-      <h2> Your request for ${company.name} has been accepted ! </h2>
-      `;
-      
       await this.redisClient.set(`user-${isRequestExist.userId}-note`, JSON.stringify(userNote));
     };
 
@@ -270,21 +268,17 @@ export class CompanyRepository {
         throw new HttpException('there is a problem in sending notification for user', 500);
       }
 
-      let userNote: string[];
+      let userNote: {}[];
 
       userNote = JSON.parse(userNoteJson);
       
-      const notification: string = `your request for ${position.name} has been rejected, here is why: ${isRequestExist.denyReason}`;
+      const notification: {} = { 
+        text: `your request for ${position.name} has been accepted !`,
+        id: userNote.length,
+        time: new Date()
+      };
 
       userNote.push(notification);
-
-      const emailMessage: string = `
-      <h1> Dear ${user?.username} </h1>
-      <br>
-      <h2> Unfortunately Your request for ${company.name} has been denied. </h2>
-      <br>
-      <h2> Reason : ${deny_reason} <h1>
-      `;
 
       await this.redisClient.set(`user-${isRequestExist.userId}-note`, JSON.stringify(userNote));
     };

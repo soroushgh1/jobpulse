@@ -44,4 +44,8 @@ export class JobSeekerService {
   async getMe(userId: number): Promise<any> {
     return await this.jobSeekerRepo.getMe(userId);
   }
+
+  async deleteNotification(notification_id: number, req): Promise<string> {
+    return await this.jobSeekerRepo.deleteNotification(notification_id, req);
+  }
 }
