@@ -209,7 +209,7 @@ export class CompanyRepository {
 
     if (!isRequestExist) throw new NotFoundException('request not found');
 
-    if (isRequestExist.isAccept == "pending") throw new BadRequestException('request is already answered')
+    if (isRequestExist.isAccept != "pending") throw new BadRequestException('request is already answered')
 
     const user: User | null = await this.prismaService.user.findUnique({ where: {
       id: isRequestExist?.id
