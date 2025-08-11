@@ -273,7 +273,7 @@ export class CompanyRepository {
       userNote = JSON.parse(userNoteJson);
       
       const notification: {} = { 
-        text: `your request for ${position.name} has been accepted !`,
+        text: `your request for ${position.name} has been rejected`,
         id: userNote.length,
         time: new Date()
       };
