@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpException,
   Injectable,
   NotFoundException,
@@ -43,6 +44,8 @@ export class AuthService {
       );
 
       if (!isExist) throw new NotFoundException('user not found');
+
+      if (isExist.is_banned == true) throw new BadRequestException("you are banned");
 
       const isPassMatch: boolean = await bcrypt.compare(
         userinput.password,
@@ -97,6 +100,12 @@ export class AuthService {
       const payload = this.jwtservice.verify(refreshToken, {
         secret: secrets.jwtrefresh,
       });
+
+      const user: User | null = await this.authrepo.findOnId(payload.id);
+
+      if (!user) throw new NotFoundException('user not found');
+
+      if (user.is_banned == true) throw new BadRequestException("you are banned");
 
       const newAccessToken: string = this.jwtservice.sign(
         { email: payload.email, id: payload.id },
@@ -203,6 +212,12 @@ export class AuthService {
     const users: Omit<User, "password">[] = await this.authrepo.findAll();
 
     return users;
+  }
+
+  async banUser(email: string): Promise<string> {
+    const result: string = await this.authrepo.banUser(email);
+
+    return result;
   }
 
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AdminLoginInput, AdminRegisterInput, UserLoginInput, UserRegisterInput } from '../dtos/auth.dto';
 import { AuthService } from '../services/auth.service';
 import { Response } from 'express';
@@ -89,6 +89,17 @@ export class AuthController {
     const users: Omit<User, "password">[] = await this.authservice.findAll();
 
     return { users, success: true };
+  }
+
+  @ApiResponse(docs.banUserOK)
+  @ApiResponse(docs.banUserBAD)
+  @Post("ban/:email")
+  @HttpCode(200)
+  @UseGuards(AuthGuard, AdminGuard)
+  async banUser(@Param('email') email: string): Promise<any> {
+    const result: string = await this.authservice.banUser(email);
+
+    return { message: result, success: true };
   }
 
 }

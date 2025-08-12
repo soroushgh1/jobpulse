@@ -127,3 +127,19 @@ export const findAllOK = {
     ]
   }
 };
+
+export const banUserOK = {
+  status: 200,
+  example: {
+    message: 'user banned successfuly',
+    success: 'true',
+  },
+};
+
+export const banUserBAD = {
+  status: 400,
+  example: {
+    statusCode: 500,
+    message: 'user not found',
+  },
+};

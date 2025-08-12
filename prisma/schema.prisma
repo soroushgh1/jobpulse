@@ -15,6 +15,7 @@ model User {
   password String
   role     String
   phone    String   @unique
+  is_banned Boolean @default(false)
 
   company   Company?  @relation("UserCompany")
   requests  Request[]

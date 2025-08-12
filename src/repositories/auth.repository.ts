@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaClient, User } from '@prisma/client';
 import { UserRegisterInput } from '../dtos/auth.dto';
 import * as bcrypt from 'bcryptjs';
@@ -60,13 +60,36 @@ export class AuthRepository {
         phone: true,
         email: true,
         role: true,
-        username: true
+        username: true,
+        is_banned: true
       }
     });
 
     if (users.length == 0 || users == null) return [];
 
     return users;
+  }
+
+  async banUser(email: string): Promise<string> {
+
+    const user: User | null = await this.prismaService.user.findUnique({
+      where: {
+        email: email
+      }
+    });
+
+    if (!user) throw new NotFoundException('user not found');
+
+    await this.prismaService.user.update({
+      where: {
+        email: email
+      },
+      data: {
+        is_banned: true
+      }
+    });
+
+    return "user banned successfuly";
   }
 
 }
