@@ -4,11 +4,8 @@ import {
   Delete,
   Get,
   HttpCode,
-  HttpException,
   HttpStatus,
   Param,
-  ParseFilePipe,
-  ParseFilePipeBuilder,
   Post,
   Put,
   Query,
@@ -40,7 +37,7 @@ export class CompanyController {
     private readonly companyService: CompanyService,
   ) {}
 
-  @Throttle({ short: {} })
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @ApiResponse(docs.createCompanyOK)
   @ApiResponse(docs.createCompanyBAD)
   @Post('create')
@@ -54,7 +51,7 @@ export class CompanyController {
     return { message: result, success: true };
   }
 
-  @Throttle({ short: {} })
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @Post('attachpicture/:slug')
   @UseGuards(AuthGuard, CompanyGuard)
   @UseInterceptors(
@@ -76,36 +73,26 @@ export class CompanyController {
           req.fileValidationErr = 'Wrong type';
           return callback(null, false);
         }
-
         return callback(null, true);
       },
     }),
-
     DeleteFilesInterceptor
   )
   @HttpCode(201)
   @ApiResponse(docs.attachPictureOK)
   async attachPicture(
-    @UploadedFiles(
-      new ParseFilePipeBuilder().build({
-        fileIsRequired: true,
-        errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-      })
-    )
+    @UploadedFiles()
     files: Array<Express.Multer.File>,
     @Param('slug') slug: string,
     @Req() req
   ): Promise<any> {
     req.UploadedFiles = files;
-
     if (req.fileValidationErr) return { success: false, error: req.fileValidationErr };
-
     const result: string = await this.companyService.attachPicture(files, slug, req);
-
     return { success: true, result: result };
   }
 
-  @Throttle({ medium: {} })
+  @Throttle({ default: { ttl: 600_000, limit: 250 } })
   @Put('update/:slug')
   @ApiParam({
     name: 'slug',
@@ -126,7 +113,7 @@ export class CompanyController {
     return { message: result, success: true };
   }
 
-  @Throttle({ long: {} })
+  @Throttle({ default: { ttl: 3_600_000, limit: 500 } })
   @UseGuards(AuthGuard, CompanyGuard)
   @Post('getme')
   @HttpCode(200)
@@ -137,7 +124,7 @@ export class CompanyController {
     return { company, success: true };
   }
 
-  @Throttle({ medium: {} })
+  @Throttle({ default: { ttl: 600_000, limit: 250 } })
   @ApiParam({
     name: 'slug',
     type: 'string',
@@ -154,7 +141,7 @@ export class CompanyController {
     return { success: true, message: result };
   }
 
-  @Throttle({ long: {} })
+  @Throttle({ default: { ttl: 3_600_000, limit: 500 } })
   @Get('')
   @ApiResponse(docs.viewAllOK)
   @ApiResponse(docs.viewAllINTERNALERROR)
@@ -163,7 +150,7 @@ export class CompanyController {
     return { companies: await this.companyService.viewAll(), success: true };
   }
 
-  @Throttle({ long: {} })
+  @Throttle({ default: { ttl: 3_600_000, limit: 500 } })
   @ApiParam({
     name: 'request_id',
     type: 'number',
@@ -183,7 +170,7 @@ export class CompanyController {
     return { message: result, success: true };
   }
 
-  @Throttle({ long: {} })
+  @Throttle({ default: { ttl: 3_600_000, limit: 500 } })
   @ApiParam({
     name: 'request_id',
     type: 'number',
@@ -202,7 +189,7 @@ export class CompanyController {
     return { message: result, success: true };
   }
 
-  @Throttle({ long: {} })
+  @Throttle({ default: { ttl: 3_600_000, limit: 500 } })
   @Get('search')
   @HttpCode(200)
   async searchCompanies(@Query('q') query: string): Promise<any> {
@@ -210,7 +197,7 @@ export class CompanyController {
     return { result: result, success: true };
   }
 
-  @Throttle({ long: {} })
+  @Throttle({ default: { ttl: 3_600_000, limit: 500 } })
   @ApiParam({
     name: 'slug',
     type: 'string',
@@ -222,12 +209,11 @@ export class CompanyController {
   async getCompany(
     @Param('slug') slug: string
   ): Promise<any> {
-    const company: CompanyGet = await this.getCompany(slug);
-
+    const company: CompanyGet = await this.companyService.getCompany(slug);
     return { company, success: true };
   }
   
-  @Throttle({ long: {} })
+  @Throttle({ default: { ttl: 3_600_000, limit: 500 } })
   @Post('deleterequest/:request_id')
   @UseGuards(AuthGuard, CompanyGuard)
   @HttpCode(200)
@@ -236,8 +222,6 @@ export class CompanyController {
     @Req() req
   ): Promise<any> {
     const result: string = await this.companyService.deleteRequestsForPosition(request_id, req);
-
     return { result, success: true };
   }
-  
 }

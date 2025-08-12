@@ -14,7 +14,7 @@ export class PositionController {
         private readonly positionService: PositionService,
     ){}
 
-    @Throttle({ medium: {} }) 
+    @Throttle({ default: { ttl: 600_000, limit: 250 } })
     @Post('create')
     @HttpCode(201)
     @UseGuards(AuthGuard, CompanyGuard)
@@ -25,7 +25,7 @@ export class PositionController {
         return { message: result, success: true };
     }
 
-    @Throttle({ long: {} })
+    @Throttle({ default: { ttl: 3_600_000, limit: 500 } })
     @Get('get/:slug')
     @HttpCode(200)
     @ApiResponse(docs.showOneOK)
@@ -35,7 +35,7 @@ export class PositionController {
         return { position, success: true };
     }
 
-    @Throttle({ medium: {} })
+    @Throttle({ default: { ttl: 600_000, limit: 250 } })
     @Put('update/:slug')
     @HttpCode(200)
     @UseGuards(AuthGuard, CompanyGuard)
@@ -46,7 +46,7 @@ export class PositionController {
         return { message: result, success: true };
     }
 
-    @Throttle({ medium: {} })
+    @Throttle({ default: { ttl: 600_000, limit: 250 } })
     @Delete('delete/:slug')
     @HttpCode(200)
     @UseGuards(AuthGuard, CompanyGuard)
@@ -57,7 +57,7 @@ export class PositionController {
         return { success: true, message: result };
     }
 
-    @Throttle({ long: {} })
+    @Throttle({ default: { ttl: 3_600_000, limit: 500 } })
     @Post('mypositions')
     @HttpCode(200)
     @UseGuards(AuthGuard, CompanyGuard)
@@ -67,7 +67,7 @@ export class PositionController {
         return { positions, success: true };
     }
 
-    @Throttle({ long: {} })
+    @Throttle({ default: { ttl: 3_600_000, limit: 500 } })
     @Get('company/:slug')
     @HttpCode(200)
     @ApiResponse(docs.allPositionsOfCompanyOK)
@@ -76,7 +76,7 @@ export class PositionController {
         return { positions, success: true };
     }
 
-    @Throttle({ long: {} })
+    @Throttle({ default: { ttl: 3_600_000, limit: 500 } })
     @Get('search')
     @HttpCode(200)
     @ApiResponse(docs.searchPositionsOK)
@@ -85,7 +85,7 @@ export class PositionController {
         return { result, success: true };
     }
 
-    @Throttle({ long: {} })
+    @Throttle({ default: { ttl: 3_600_000, limit: 500 } })
     @Get('allpositions')
     @HttpCode(200)
     @ApiResponse(docs.searchPositionsOK)

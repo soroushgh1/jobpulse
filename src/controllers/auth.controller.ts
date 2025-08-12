@@ -13,7 +13,7 @@ import { SkipThrottle, Throttle } from '@nestjs/throttler';
 export class AuthController {
   constructor(private readonly authservice: AuthService) {}
 
-  @Throttle({ short: {} })
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })  // 10 requests / 60 seconds
   @ApiResponse(docs.registerOK)
   @ApiResponse(docs.registerBAD)
   @Post('register')
@@ -23,7 +23,7 @@ export class AuthController {
     return { message: result, success: true };
   }
 
-  @Throttle({ short: {} })
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @ApiResponse(docs.loginOK)
   @ApiResponse(docs.loginBAD)
   @Post('login')
@@ -35,18 +35,17 @@ export class AuthController {
     res.status(200).json({ message: result, success: true });
   }
 
-  @Throttle({ short: {} })
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @ApiResponse(docs.refreshOK)
   @ApiResponse(docs.refreshBAD)
   @HttpCode(200)
   @Post('refresh')
   async refreshJWT(@Req() req, @Res() res): Promise<any> {
     const result: string = await this.authservice.getRefreshJWT(req, res);
-
     res.status(200).json({ message: result, success: true });
   }
 
-  @Throttle({ short: {} })
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @ApiResponse(docs.authStatusOK)
   @ApiResponse(docs.authStatusBAD)
   @HttpCode(200)
@@ -55,7 +54,7 @@ export class AuthController {
     return this.authservice.getAuthStatus(req);
   }
 
-  @Throttle({ short: {} })
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @HttpCode(200)
   @Post('logout')
   logOut(
@@ -63,11 +62,10 @@ export class AuthController {
   ): any {
     res.clearCookie("accessToken");
     res.clearCookie("refreshToken");
-
     res.status(200).json({ message: "logout successful", success: true });
   } 
 
-  @Throttle({ short: {} })
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @ApiResponse(docs.adminRegisterOK)
   @ApiResponse(docs.adminRegisterBAD)
   @Post('masterkeyup')
@@ -77,7 +75,7 @@ export class AuthController {
     return { message: result, success: true };
   }
 
-  @Throttle({ short: {} })
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @ApiResponse(docs.adminLoginOK)
   @ApiResponse(docs.adminLoginBAD)
   @Post('masterkeyin')
@@ -89,26 +87,24 @@ export class AuthController {
     res.status(200).json({ message: result, success: true });
   }
 
-  @SkipThrottle({ short: true, medium: true, long: true })
+  @SkipThrottle()
   @ApiResponse(docs.findAllOK)
   @HttpCode(200)
   @Post("allusers")
   @UseGuards(AuthGuard, AdminGuard)
   async findAll(): Promise<any> {
     const users: Omit<User, "password">[] = await this.authservice.findAll();
-
     return { users, success: true };
   }
 
-  @SkipThrottle({ short: true, medium: true, long: true })  @ApiResponse(docs.banUserOK)
+  @SkipThrottle()
+  @ApiResponse(docs.banUserOK)
   @ApiResponse(docs.banUserBAD)
   @Post("ban/:email")
   @HttpCode(200)
   @UseGuards(AuthGuard, AdminGuard)
   async banUser(@Param('email') email: string): Promise<any> {
     const result: string = await this.authservice.banUser(email);
-
     return { message: result, success: true };
   }
-
 }

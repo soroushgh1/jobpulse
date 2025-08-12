@@ -30,7 +30,7 @@ import { Throttle } from '@nestjs/throttler';
 export class JobSeekerController {
   constructor(private readonly jobSeekerService: JobSeekerService) {}
 
-  @Throttle({ medium: {} })
+  @Throttle({ default: { ttl: 600_000, limit: 250 } }) // medium: 10 min, 250 req
   @ApiParam({
     name: 'slug',
     type: 'string',
@@ -81,7 +81,7 @@ export class JobSeekerController {
     return { message: result, success: true };
   }
 
-  @Throttle({ medium: {} })
+  @Throttle({ default: { ttl: 600_000, limit: 250 } }) // medium
   @ApiParam({
     name: 'slug',
     type: 'string',
@@ -97,7 +97,7 @@ export class JobSeekerController {
     return { message: result, success: true };
   }
 
-  @Throttle({ long: {} })
+  @Throttle({ default: { ttl: 3_600_000, limit: 500 } }) // long: 1 hour, 500 req
   @ApiResponse(docs.showMyRequestsOK)
   @Post('myrequests')
   @UseGuards(AuthGuard, JobSeekerGuard)
@@ -107,7 +107,7 @@ export class JobSeekerController {
     return { requests, success: true };
   }
 
-  @Throttle({ long: {} })
+  @Throttle({ default: { ttl: 3_600_000, limit: 500 } }) // long
   @ApiResponse(docs.showAllRequestsOK)
   @ApiResponse(docs.showAllRequestsUNAUTHORIZED)
   @Post('allrequests')
@@ -118,7 +118,7 @@ export class JobSeekerController {
     return { requests, success: true };
   }
 
-  @Throttle({ long: {} })
+  @Throttle({ default: { ttl: 3_600_000, limit: 500 } }) // long
   @ApiParam({
     name: 'slug',
     type: 'string',
@@ -134,7 +134,7 @@ export class JobSeekerController {
     return { requests, success: true };
   }
 
-  @Throttle({ long: {} })
+  @Throttle({ default: { ttl: 3_600_000, limit: 500 } }) // long
   @ApiResponse(docs.showMyNotificationsOK)
   @ApiResponse(docs.showMyNotificationsBAD)
   @Post('mynotifications')
@@ -145,7 +145,7 @@ export class JobSeekerController {
     return { success: true, notifications: notifications };
   }
 
-  @Throttle({ long: {} })
+  @Throttle({ default: { ttl: 3_600_000, limit: 500 } }) // long
   @Post('getme')
   @UseGuards(AuthGuard)
   @HttpCode(200)
@@ -154,14 +154,12 @@ export class JobSeekerController {
     return { success: true, user: user };
   }
 
-  @Throttle({ long: {} })
+  @Throttle({ default: { ttl: 3_600_000, limit: 500 } }) // long
   @Post('deletenotif/:id')
   @UseGuards(AuthGuard)
   @HttpCode(200)
   async deleteNotification(@Param('id') notification_id: number, @Req() req): Promise<any> {
-    
     const result: string = await this.jobSeekerService.deleteNotification(notification_id, req);
-
     return { result, success: true };
   }
 }
