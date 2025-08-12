@@ -32,6 +32,7 @@ import { diskStorage } from 'multer';
 import { MakeUniqueFileName } from 'src/utils/helpers';
 import { DeleteFilesInterceptor } from '../interceptors/deleteFiles.interceptor';
 import * as docs from 'src/docs/company.docs';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('company')
 export class CompanyController {
@@ -39,6 +40,7 @@ export class CompanyController {
     private readonly companyService: CompanyService,
   ) {}
 
+  @Throttle({ short: {} })
   @ApiResponse(docs.createCompanyOK)
   @ApiResponse(docs.createCompanyBAD)
   @Post('create')
@@ -52,6 +54,7 @@ export class CompanyController {
     return { message: result, success: true };
   }
 
+  @Throttle({ short: {} })
   @Post('attachpicture/:slug')
   @UseGuards(AuthGuard, CompanyGuard)
   @UseInterceptors(
@@ -102,6 +105,7 @@ export class CompanyController {
     return { success: true, result: result };
   }
 
+  @Throttle({ medium: {} })
   @Put('update/:slug')
   @ApiParam({
     name: 'slug',
@@ -122,6 +126,7 @@ export class CompanyController {
     return { message: result, success: true };
   }
 
+  @Throttle({ long: {} })
   @UseGuards(AuthGuard, CompanyGuard)
   @Post('getme')
   @HttpCode(200)
@@ -132,6 +137,7 @@ export class CompanyController {
     return { company, success: true };
   }
 
+  @Throttle({ medium: {} })
   @ApiParam({
     name: 'slug',
     type: 'string',
@@ -148,6 +154,7 @@ export class CompanyController {
     return { success: true, message: result };
   }
 
+  @Throttle({ long: {} })
   @Get('')
   @ApiResponse(docs.viewAllOK)
   @ApiResponse(docs.viewAllINTERNALERROR)
@@ -156,6 +163,7 @@ export class CompanyController {
     return { companies: await this.companyService.viewAll(), success: true };
   }
 
+  @Throttle({ long: {} })
   @ApiParam({
     name: 'request_id',
     type: 'number',
@@ -175,6 +183,7 @@ export class CompanyController {
     return { message: result, success: true };
   }
 
+  @Throttle({ long: {} })
   @ApiParam({
     name: 'request_id',
     type: 'number',
@@ -193,6 +202,7 @@ export class CompanyController {
     return { message: result, success: true };
   }
 
+  @Throttle({ long: {} })
   @Get('search')
   @HttpCode(200)
   async searchCompanies(@Query('q') query: string): Promise<any> {
@@ -200,6 +210,7 @@ export class CompanyController {
     return { result: result, success: true };
   }
 
+  @Throttle({ long: {} })
   @ApiParam({
     name: 'slug',
     type: 'string',
@@ -216,6 +227,7 @@ export class CompanyController {
     return { company, success: true };
   }
   
+  @Throttle({ long: {} })
   @Post('deleterequest/:request_id')
   @UseGuards(AuthGuard, CompanyGuard)
   @HttpCode(200)

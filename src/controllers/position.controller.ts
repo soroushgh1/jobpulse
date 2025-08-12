@@ -6,6 +6,7 @@ import { PositionGet } from 'src/types/types';
 import { CreatePositionInput, UpdatePositionInput } from '../dtos/position.dto';
 import * as docs from 'src/docs/position.docs';
 import { ApiResponse } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('position')
 export class PositionController {
@@ -13,6 +14,7 @@ export class PositionController {
         private readonly positionService: PositionService,
     ){}
 
+    @Throttle({ medium: {} }) 
     @Post('create')
     @HttpCode(201)
     @UseGuards(AuthGuard, CompanyGuard)
@@ -23,6 +25,7 @@ export class PositionController {
         return { message: result, success: true };
     }
 
+    @Throttle({ long: {} })
     @Get('get/:slug')
     @HttpCode(200)
     @ApiResponse(docs.showOneOK)
@@ -32,6 +35,7 @@ export class PositionController {
         return { position, success: true };
     }
 
+    @Throttle({ medium: {} })
     @Put('update/:slug')
     @HttpCode(200)
     @UseGuards(AuthGuard, CompanyGuard)
@@ -42,6 +46,7 @@ export class PositionController {
         return { message: result, success: true };
     }
 
+    @Throttle({ medium: {} })
     @Delete('delete/:slug')
     @HttpCode(200)
     @UseGuards(AuthGuard, CompanyGuard)
@@ -52,6 +57,7 @@ export class PositionController {
         return { success: true, message: result };
     }
 
+    @Throttle({ long: {} })
     @Post('mypositions')
     @HttpCode(200)
     @UseGuards(AuthGuard, CompanyGuard)
@@ -61,6 +67,7 @@ export class PositionController {
         return { positions, success: true };
     }
 
+    @Throttle({ long: {} })
     @Get('company/:slug')
     @HttpCode(200)
     @ApiResponse(docs.allPositionsOfCompanyOK)
@@ -69,6 +76,7 @@ export class PositionController {
         return { positions, success: true };
     }
 
+    @Throttle({ long: {} })
     @Get('search')
     @HttpCode(200)
     @ApiResponse(docs.searchPositionsOK)
@@ -77,6 +85,7 @@ export class PositionController {
         return { result, success: true };
     }
 
+    @Throttle({ long: {} })
     @Get('allpositions')
     @HttpCode(200)
     @ApiResponse(docs.searchPositionsOK)

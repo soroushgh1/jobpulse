@@ -151,7 +151,7 @@ export class AuthService {
       if (userinput.adminsecret != process.env.ADMIN_SECRET) 
         throw new HttpException('admin secret wrong', 400);
 
-      this.authrepo.createUser(userinput);
+      await this.authrepo.createUser(userinput);
 
       return "admin created successfully."
   }

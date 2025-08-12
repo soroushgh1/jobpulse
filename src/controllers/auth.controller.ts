@@ -7,11 +7,13 @@ import * as docs from 'src/docs/auth.docs';
 import { User } from '@prisma/client';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { AdminGuard } from 'src/guards/admin.guard';
+import { SkipThrottle, Throttle } from '@nestjs/throttler';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authservice: AuthService) {}
 
+  @Throttle({ short: {} })
   @ApiResponse(docs.registerOK)
   @ApiResponse(docs.registerBAD)
   @Post('register')
@@ -21,6 +23,7 @@ export class AuthController {
     return { message: result, success: true };
   }
 
+  @Throttle({ short: {} })
   @ApiResponse(docs.loginOK)
   @ApiResponse(docs.loginBAD)
   @Post('login')
@@ -32,6 +35,7 @@ export class AuthController {
     res.status(200).json({ message: result, success: true });
   }
 
+  @Throttle({ short: {} })
   @ApiResponse(docs.refreshOK)
   @ApiResponse(docs.refreshBAD)
   @HttpCode(200)
@@ -42,6 +46,7 @@ export class AuthController {
     res.status(200).json({ message: result, success: true });
   }
 
+  @Throttle({ short: {} })
   @ApiResponse(docs.authStatusOK)
   @ApiResponse(docs.authStatusBAD)
   @HttpCode(200)
@@ -50,6 +55,7 @@ export class AuthController {
     return this.authservice.getAuthStatus(req);
   }
 
+  @Throttle({ short: {} })
   @HttpCode(200)
   @Post('logout')
   logOut(
@@ -61,6 +67,7 @@ export class AuthController {
     res.status(200).json({ message: "logout successful", success: true });
   } 
 
+  @Throttle({ short: {} })
   @ApiResponse(docs.adminRegisterOK)
   @ApiResponse(docs.adminRegisterBAD)
   @Post('masterkeyup')
@@ -70,6 +77,7 @@ export class AuthController {
     return { message: result, success: true };
   }
 
+  @Throttle({ short: {} })
   @ApiResponse(docs.adminLoginOK)
   @ApiResponse(docs.adminLoginBAD)
   @Post('masterkeyin')
@@ -81,6 +89,7 @@ export class AuthController {
     res.status(200).json({ message: result, success: true });
   }
 
+  @SkipThrottle({ short: true, medium: true, long: true })
   @ApiResponse(docs.findAllOK)
   @HttpCode(200)
   @Post("allusers")
@@ -91,7 +100,7 @@ export class AuthController {
     return { users, success: true };
   }
 
-  @ApiResponse(docs.banUserOK)
+  @SkipThrottle({ short: true, medium: true, long: true })  @ApiResponse(docs.banUserOK)
   @ApiResponse(docs.banUserBAD)
   @Post("ban/:email")
   @HttpCode(200)

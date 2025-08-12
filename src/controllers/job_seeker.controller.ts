@@ -23,12 +23,14 @@ import { diskStorage } from 'multer';
 import { MakeUniqueFileName } from 'src/utils/helpers';
 import { DeleteFileInterceptor } from 'src/interceptors/deleteFile.interceptor';
 import * as docs from 'src/docs/job_seeker.docs';
+import { Throttle } from '@nestjs/throttler';
 
 @ApiTags('jobseeker')
 @Controller('jobseeker')
 export class JobSeekerController {
   constructor(private readonly jobSeekerService: JobSeekerService) {}
 
+  @Throttle({ medium: {} })
   @ApiParam({
     name: 'slug',
     type: 'string',
@@ -79,6 +81,7 @@ export class JobSeekerController {
     return { message: result, success: true };
   }
 
+  @Throttle({ medium: {} })
   @ApiParam({
     name: 'slug',
     type: 'string',
@@ -94,6 +97,7 @@ export class JobSeekerController {
     return { message: result, success: true };
   }
 
+  @Throttle({ long: {} })
   @ApiResponse(docs.showMyRequestsOK)
   @Post('myrequests')
   @UseGuards(AuthGuard, JobSeekerGuard)
@@ -103,6 +107,7 @@ export class JobSeekerController {
     return { requests, success: true };
   }
 
+  @Throttle({ long: {} })
   @ApiResponse(docs.showAllRequestsOK)
   @ApiResponse(docs.showAllRequestsUNAUTHORIZED)
   @Post('allrequests')
@@ -113,6 +118,7 @@ export class JobSeekerController {
     return { requests, success: true };
   }
 
+  @Throttle({ long: {} })
   @ApiParam({
     name: 'slug',
     type: 'string',
@@ -128,6 +134,7 @@ export class JobSeekerController {
     return { requests, success: true };
   }
 
+  @Throttle({ long: {} })
   @ApiResponse(docs.showMyNotificationsOK)
   @ApiResponse(docs.showMyNotificationsBAD)
   @Post('mynotifications')
@@ -138,14 +145,16 @@ export class JobSeekerController {
     return { success: true, notifications: notifications };
   }
 
+  @Throttle({ long: {} })
   @Post('getme')
   @UseGuards(AuthGuard)
   @HttpCode(200)
   async getMe(@Req() req): Promise<any> {
-    const user = await this.jobSeekerService.getMe(req.user.id);
+    const user = await this.jobSeekerService.getMe(req.user.id, req.user.isAdmin);
     return { success: true, user: user };
   }
 
+  @Throttle({ long: {} })
   @Post('deletenotif/:id')
   @UseGuards(AuthGuard)
   @HttpCode(200)

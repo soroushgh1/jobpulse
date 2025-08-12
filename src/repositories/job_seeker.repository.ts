@@ -7,7 +7,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { PositionRepo } from 'src/repositories/position.repository';
-import { Company, Position, PrismaClient, Request } from '@prisma/client';
+import { Company, Position, PrismaClient, Request, User } from '@prisma/client';
 import Redis from 'ioredis';
 import * as path from 'path';
 import { promises as fs } from 'fs';
@@ -238,16 +238,23 @@ export class JobSeekerRepo {
     return notifications;
   }
 
-  async getMe(userId: number) {
-    return await this.prismaService.user.findUnique({
+  async getMe(userId: number, isAdmin: boolean) {
+
+    const user = await this.prismaService.user.findUnique({
       where: { id: userId },
       select: {
         username: true,
         email: true,
         phone: true,
         role: true,
+        is_banned: true,
+        id: true,
       },
     });
+
+    if (!user) throw new NotFoundException('user not found');
+
+    return { ...user, is_admin: isAdmin };
   }
 
   async deleteNotification(notification_id: number, req): Promise<string> {

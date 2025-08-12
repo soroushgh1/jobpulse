@@ -6,6 +6,7 @@ import { Ticket } from '@prisma/client';
 import { AdminGuard } from 'src/guards/admin.guard';
 import * as docs from "src/docs/ticket.docs";
 import { ApiResponse } from '@nestjs/swagger';
+import { SkipThrottle, Throttle } from '@nestjs/throttler';
 
 @Controller('ticket')
 export class TicketController {
@@ -13,6 +14,7 @@ export class TicketController {
         private readonly ticketService: TicketService,
     ) {}
 
+    @Throttle({ medium: {} })
     @ApiResponse(docs.createTicketCreated)
     @ApiResponse(docs.createTicketBadRequest)
     @Post('create')
@@ -26,6 +28,7 @@ export class TicketController {
         return { slug: result.slug, message: result.message, success: true };
     }
 
+    @SkipThrottle({ short: true, medium: true, long: true })
     @ApiResponse(docs.adminViewTicketsOK)
     @Post('alltickets')
     @HttpCode(HttpStatus.OK)
@@ -35,6 +38,7 @@ export class TicketController {
         return { tickets: result, success: true };
     }
 
+    @SkipThrottle({ short: true, medium: true, long: true })
     @ApiResponse(docs.attachTicketOK)
     @ApiResponse(docs.attachTicketBAD)
     @HttpCode(HttpStatus.OK)
@@ -48,6 +52,7 @@ export class TicketController {
         return { message: result, success: true };
     }
 
+    @Throttle({ long: {} }) 
     @ApiResponse(docs.messageOK)
     @ApiResponse(docs.messageBAD)
     @HttpCode(HttpStatus.OK)
@@ -62,7 +67,7 @@ export class TicketController {
         return { message: result, success: true };
     }
 
-    @ApiResponse(docs.myTicketsOK)
+    @Throttle({ long: {} }) 
     @Post('mytickets')
     @HttpCode(HttpStatus.OK)
     @UseGuards(AuthGuard)
@@ -73,6 +78,7 @@ export class TicketController {
         return { tickets, success: true };
     }
 
+    @Throttle({ medium: {} }) 
     @ApiResponse(docs.deleteTicketOK)
     @ApiResponse(docs.deleteTicketBAD)
     @Post('delete/:slug')
@@ -86,6 +92,7 @@ export class TicketController {
         return { success: true, message: result };
     }
 
+    @Throttle({ medium: {} }) 
     @ApiResponse(docs.updateTicketOK)
     @ApiResponse(docs.updateTicketBAD)
     @Put('update/:slug')
@@ -100,6 +107,7 @@ export class TicketController {
         return { success: true, message: result };
     }
 
+    @Throttle({ long: {} }) 
     @ApiResponse(docs.userViewTicketOK)
     @ApiResponse(docs.userViewTicketNotFound)
     @Post(':slug')
