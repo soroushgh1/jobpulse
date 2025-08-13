@@ -107,7 +107,8 @@ export class AuthService {
 
       if (user.is_banned == true) throw new BadRequestException("you are banned");
 
-      const newAccessToken: string = this.jwtservice.sign(payload,
+      const newAccessToken: string = this.jwtservice.sign(
+        { id: payload.id, email: payload.email, isAdmin: payload.isAdmin},
         { secret: secrets.jwtaccess, expiresIn: '1h' },
       );
 
