@@ -3,6 +3,7 @@ import { PrismaClient, Ticket } from "@prisma/client";
 import { MessageDTO, TicketMakeDto, TicketUpdateDto } from "../dtos/ticket.dto";
 import slugify from "slugify";
 import Redis from "ioredis";
+import { throwError } from "rxjs";
 
 @Injectable()
 export class TicketRepo {
@@ -117,7 +118,7 @@ export class TicketRepo {
         const findTicket: Ticket | null = await this.prismaClient.ticket.findUnique({ where: { slug: ticketSlug } });
 
         if (!findTicket) throw new NotFoundException('ticket not found');
-
+        if (findTicket.adminUserId == null) throw new BadRequestException('admins still did not answered this, you cant send a message.')
         if (req.user.id !== findTicket.adminUserId && req.user.id !== findTicket.userId) {
             throw new UnauthorizedException('you are not a part of this conversation');
         }
@@ -142,7 +143,6 @@ export class TicketRepo {
                     created_at: new Date().toISOString(),
                 }
             });
-
             await tx.ticket.update({
                 where: { slug: ticketSlug },
                 data: {
@@ -168,7 +168,7 @@ export class TicketRepo {
             }
 
         });
-        
+        throw new InternalServerErrorException("yo yo");
         return "message sent";
     }
 
