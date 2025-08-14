@@ -62,10 +62,8 @@ export class TicketRepo {
 
         if (!ticket) throw new NotFoundException('ticket not found');
         if (ticket.userId !== req.user.id && req.user.isAdmin === false) throw new UnauthorizedException('you can not access other people tickets');
-
-        const { userId, adminUserId, ...safeTicket } = ticket;
         
-        return safeTicket;
+        return ticket;
     }
 
     async adminViewTickets(): Promise<Omit<Ticket, "userId" | "adminUserId">[]> {
