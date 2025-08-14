@@ -166,7 +166,6 @@ export class TicketRepo {
             }
 
         });
-        throw new InternalServerErrorException("yo yo");
         return "message sent";
     }
 
