@@ -135,7 +135,8 @@ export class TicketRepo {
 
             const message = await tx.message.create({
                 data: {
-                    ...input,
+                    text: input.text,
+                    reply_to_id: input.reply_to_id,
                     ticket_id: findTicket.id,
                     user_id: req.user.id,
                     created_at: new Date().toISOString(),
