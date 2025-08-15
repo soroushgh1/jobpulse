@@ -116,7 +116,7 @@ export class TicketRepo {
         const findTicket: Ticket | null = await this.prismaClient.ticket.findUnique({ where: { slug: ticketSlug } });
 
         if (!findTicket) throw new NotFoundException('ticket not found');
-        if (findTicket.adminUserId == null) throw new BadRequestException('admins still did not answered this, you cant send a message.')
+        if (!findTicket.adminUserId) throw new BadRequestException('admins still did not answered this, you cant send a message.')
         if (req.user.id !== findTicket.adminUserId && req.user.id !== findTicket.userId) {
             throw new UnauthorizedException('you are not a part of this conversation');
         }

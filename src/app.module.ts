@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { RedisModule } from './redis/redis.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -12,6 +12,8 @@ import { PositionModule } from './modules/position.module';
 import { TicketModule } from './modules/ticket.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { LogRequest } from './config/log.interceptor';
+import { WinstonLogger } from './config/winston.logger';
 
 @Module({
   imports: [
@@ -47,6 +49,7 @@ import { APP_GUARD } from '@nestjs/core';
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
+    WinstonLogger
   ],
 })
 export class AppModule {}

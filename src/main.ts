@@ -6,6 +6,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import winston from 'winston/lib/winston/config';
 import { WinstonLogger } from './config/winston.logger';
 import { LogExceptionFilter } from './config/logexception.filter';
+import { LogRequest } from './config/log.interceptor';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -26,6 +28,12 @@ async function bootstrap() {
 
   logger.debug("app is running on port 3000");
   app.useGlobalFilters(new LogExceptionFilter(logger));
+  app.useGlobalInterceptors(new LogRequest(logger));
+  app.use(helmet());
+  app.enableCors({
+    origin: "*"
+  })
+
   await app.listen(process.env.PORT ?? 3000);
 }
 

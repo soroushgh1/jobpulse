@@ -7,73 +7,92 @@ export class WinstonLogger {
   private readonly logger: winston.Logger;
 
   constructor() {
+
+    const levelFilter = (level: string) =>
+      winston.format((info) => (info.level === level ? info : false))();
+
     const logDir = path.join(process.cwd(), 'src', 'logs');
 
-    const levelFilter = (level: string) => {
-      return winston.format((info) => {
-        return info.level === level ? info : false;
-      })();
-    };
+    const textFormat = winston.format.combine(
+      winston.format.timestamp(),
+      winston.format.printf(({ timestamp, level, message }) => {
+        return `${timestamp} [${level.toUpperCase()}]: ${message}`;
+      }),
+    );
+
+    const jsonFormat = winston.format.combine(
+      winston.format.timestamp(),
+      winston.format.json(),
+    );
 
     this.logger = winston.createLogger({
-      format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.printf(({ timestamp, level, message }) => {
-          return `${timestamp} [${level}]: ${message}`;
-        }),
-      ),
       transports: [
         new winston.transports.File({
           filename: 'error.log',
           dirname: logDir,
           level: 'error',
-          format: levelFilter('error')
+          format: winston.format.combine(
+            textFormat,
+            levelFilter("error")
+          ),
         }),
         new winston.transports.File({
           filename: 'warn.log',
           dirname: logDir,
           level: 'warn',
-          format: levelFilter('warn')
+          format: winston.format.combine(
+            textFormat,
+            levelFilter("warn")
+          ),
         }),
         new winston.transports.File({
           filename: 'info.log',
           dirname: logDir,
           level: 'info',
-          format: levelFilter('info')
-        }),
-        new winston.transports.File({
-          filename: 'http.log',
-          dirname: logDir,
-          level: 'http',
-          format: levelFilter('http')
+          format: winston.format.combine(
+            textFormat,
+            levelFilter("info")
+          ),
         }),
         new winston.transports.File({
           filename: 'debug.log',
           dirname: logDir,
           level: 'debug',
-          format: levelFilter('debug')
+          format: winston.format.combine(
+            textFormat,
+            levelFilter("debug")
+          ),
+        }),
+        new winston.transports.File({
+          filename: 'http.json',
+          dirname: logDir,
+          level: 'http',
+          format: winston.format.combine(
+            jsonFormat,
+            levelFilter("http")
+          ),
         }),
       ],
     });
   }
 
   error(message: string, trace?: string) {
-    this.logger.error(`${message} - ${trace}`);
+    this.logger.error(trace ? `${message} - ${trace}` : message);
   }
 
   warn(message: string) {
     this.logger.warn(message);
   }
 
-  debug(message: string) {
-    this.logger.debug(message);
-  }
-
   info(message: string) {
     this.logger.info(message);
   }
 
-  http(message: string) {
-    this.logger.http(message);
+  debug(message: string) {
+    this.logger.debug(message);
+  }
+
+  http(data: Record<string, any>) {
+    this.logger.http(data);
   }
 }
